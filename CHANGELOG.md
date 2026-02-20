@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.2] - 2026-02-20
+### Fixed
+- Added PHP version constraint to composer.json to reflect requirements
+
 ## [1.0.1] - 2026-02-15
 
 ### Fixed
