@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.2.0] - 2026-03-04
+
+### Removed
+- 5 `NewAction` controllers (Rma, Status, Reason, ResolutionType, ItemCondition) — redundant `forward('edit')`, listing buttons now point directly to `*/*/edit`
+- 3 entity-specific Actions columns (ReasonActions, ResolutionTypeActions, ItemConditionActions) — replaced by `GenericEntityActions` with di.xml virtual types
+
+### Added
+- `GenericEntityActions` UI component column with parameterized `editUrlPath`, `deleteUrlPath`, `entityLabel` — reused via 3 virtual types in di.xml
+
+### Fixed
+- `$storeId` undefined in `Service\Email\Sender::sendRmaEmail()` — now correctly resolved from `$rma->getStoreId()`
+
+### Changed
+- All constants switched to unqualified `const` with explicit type hints (`const string`, `const array`) across the entire module
+- `CleanupCommand::getClosedStatusIds()` condensed from foreach to `array_map`
+- `StatusCommand::renderItems()` inlined intermediate `$conditionLabel` variable
+- Removed 2 unused imports (`ItemInterface` in OrderItems block, `SearchResultsInterface` in AbstractRmaManagement)
+
 ## [1.1.0] - 2026-02-22
 
 ### Added
