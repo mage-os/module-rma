@@ -1,5 +1,52 @@
 # Changelog
 
+## [1.3.1] - 2026-03-09
+
+### Fixed
+- JSON responses returning objects instead of arrays due to `array_map` preserving entity ID keys from `$collection->getItems()` — caused admin comment polling to silently fail and Hyvä comment save to throw TypeError on `forEach`
+- Comment save controllers now wrap everything in a catch-all `Exception` handler to guarantee JSON response even on unexpected errors
+- Comment attachments not appearing in real-time — `toArray()` was called before `saveFromJson()`, so attachments were not yet in DB when queried
+- Guest RMA creation not passing `attachmentsJson` to `createRma()` — caused silent data loss for guest attachments
+
+### Added
+- Accepted file types info (extensions, max size, max files) displayed in comment upload dropzones (Luma, Hyvä, Admin)
+
+## [1.3.0] - 2026-03-08
+
+### Changed
+
+#### Controller Deduplication (~500 lines removed)
+- New abstract controllers: `AbstractLookupSave`, `AbstractLookupDelete`, `AbstractLookupInlineEdit`, `AbstractLookupMassDelete`, `AbstractLookupEdit`
+- 20 concrete lookup controllers (Status, Reason, ResolutionType, ItemCondition × 5 actions) reduced to minimal subclasses
+
+#### Security
+- Path traversal protection in `AttachmentService::getAbsolutePath()` — validates resolved path starts with base attachments directory
+- Filename sanitization in `moveFromTmpAndSave()` via `basename()`
+- File size validation before and after upload in `uploadToTmp()`
+- Inline edit mass assignment protection via field whitelists in abstract controller
+
+#### Code Quality
+- `foreach` loops replaced with `array_map`/`array_filter` across 6 locations
+- `AbstractHelper` removed from `ModuleConfig` — now injects `ScopeConfigInterface` directly
+- Unused `LoggerInterface` removed from `AttachmentService`
+- `json_encode`/`json_decode` replaced with `Magento\Framework\Serialize\Serializer\Json`
+- Download logic deduplicated into `AttachmentService::createDownloadResponse()`
+- Status label resolution moved inside `Sender::sendCustomerStatusChangeEmail()`
+- Double order load eliminated in `ReturnDataProvider`
+- Comment save error handling split: comment save and attachment save in separate try/catch blocks
+- Hyvä Alpine `submitComment()` now has proper error handling (catch + else branches)
+- FQCN inline references replaced with `use` imports
+- Coding style fixes: spacing, import ordering, redundant annotations removed
+- `$block->escape*()` migrated to `$escaper->escape*()` in all 13 PHTML templates
+- FK validation added for status_id, reason_id, resolution_type_id in RMA save controllers
+- FilterGroup OR semantics preserved in `AbstractRmaManagement::buildScopedSearchCriteria()`
+
+### Added
+- `@throws` annotations on all methods that can throw (direct or indirect)
+- `HttpPostActionInterface` on `AbstractLookupInlineEdit`
+- Magic number constants `BYTES_PER_KB`, `BYTES_PER_MB` in `AttachmentService`
+- New i18n strings for error messages (4 languages)
+
 ## [1.2.0] - 2026-03-04
 
 ### Removed
