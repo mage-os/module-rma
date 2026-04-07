@@ -4,6 +4,9 @@
     "type": "magento2-module",
     "require": {
         "magento/framework": "*",
+        "magento/module-sales": "*",
+        "magento/module-webapi": "*",
+        "magento/module-graph-ql": "*",
         "php": ">=8.3"
     },
     "authors": [
