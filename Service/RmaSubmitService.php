@@ -27,6 +27,7 @@ class RmaSubmitService
      * @param StatusCollectionFactory $statusCollectionFactory
      * @param ModuleConfig $moduleConfig
      * @param AttachmentService $attachmentService
+     * @param OrderEligibility $orderEligibility
      */
     public function __construct(
         protected readonly RMARepositoryInterface $rmaRepository,
@@ -35,7 +36,8 @@ class RmaSubmitService
         protected readonly ItemRepositoryInterface $itemRepository,
         protected readonly StatusCollectionFactory $statusCollectionFactory,
         protected readonly ModuleConfig $moduleConfig,
-        protected readonly AttachmentService $attachmentService
+        protected readonly AttachmentService $attachmentService,
+        protected readonly OrderEligibility $orderEligibility
     ) {
     }
 
@@ -132,15 +134,21 @@ class RmaSubmitService
      */
     public function saveItems(int $rmaId, array $selectedItems, OrderInterface $order): void
     {
-        $validOrderItemIds = [];
-        foreach ($order->getItems() as $orderItem) {
-            $validOrderItemIds[] = (int)$orderItem->getItemId();
+        $eligibleItems = [];
+        foreach ($this->orderEligibility->getEligibleItems($order) as $eligibleItem) {
+            $eligibleItems[$eligibleItem['order_item_id']] = $eligibleItem['qty_available'];
         }
 
         foreach ($selectedItems as $orderItemId => $itemData) {
-            if (!in_array($orderItemId, $validOrderItemIds, true)) {
+            if (!isset($eligibleItems[$orderItemId])) {
                 throw new LocalizedException(
-                    __('Item ID %1 does not belong to order #%2.', $orderItemId, $order->getIncrementId())
+                    __('Item ID %1 is not eligible for return on order #%2.', $orderItemId, $order->getIncrementId())
+                );
+            }
+
+            if ($itemData['qty_requested'] > $eligibleItems[$orderItemId]) {
+                throw new LocalizedException(
+                    __('Requested qty for item %1 exceeds available qty (%2).', $orderItemId, $eligibleItems[$orderItemId])
                 );
             }
 
