@@ -56,6 +56,12 @@
         <index referenceId="RMA_ENTITY_STATUS_ID" indexType="btree">
             <column name="status_id"/>
         </index>
+        <index referenceId="RMA_ENTITY_REASON_ID" indexType="btree">
+            <column name="reason_id"/>
+        </index>
+        <index referenceId="RMA_ENTITY_RESOLUTION_TYPE_ID" indexType="btree">
+            <column name="resolution_type_id"/>
+        </index>
     </table>
 
     <!-- RMA Item table -->

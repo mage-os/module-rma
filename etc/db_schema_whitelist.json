@@ -28,7 +28,9 @@
             "RMA_ENTITY_ORDER_ID": true,
             "RMA_ENTITY_CUSTOMER_ID": true,
             "RMA_ENTITY_STORE_ID": true,
-            "RMA_ENTITY_STATUS_ID": true
+            "RMA_ENTITY_STATUS_ID": true,
+            "RMA_ENTITY_REASON_ID": true,
+            "RMA_ENTITY_RESOLUTION_TYPE_ID": true
         }
     },
     "rma_item_condition": {
@@ -165,6 +167,27 @@
         },
         "index": {
             "RMA_ITEM_CONDITION_LABEL_STORE_ID": true
+        }
+    },
+    "rma_attachment": {
+        "column": {
+            "entity_id": true,
+            "rma_id": true,
+            "comment_id": true,
+            "file_name": true,
+            "file_path": true,
+            "file_size": true,
+            "mime_type": true,
+            "created_at": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "RMA_ATTACHMENT_RMA_ID_RMA_ENTITY_ENTITY_ID": true,
+            "RMA_ATTACHMENT_COMMENT_ID_RMA_COMMENT_ENTITY_ID": true
+        },
+        "index": {
+            "RMA_ATTACHMENT_RMA_ID": true,
+            "RMA_ATTACHMENT_COMMENT_ID": true
         }
     },
     "rma_comment": {
