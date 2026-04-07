@@ -71,12 +71,12 @@ interface StatusInterface
     public function setSortOrder(int $sortOrder): self;
 
     /**
-     * @return array
+     * @return string[]
      */
     public function getStoreLabels(): array;
 
     /**
-     * @param array $storeLabels
+     * @param string[] $storeLabels
      * @return $this
      */
     public function setStoreLabels(array $storeLabels): self;
