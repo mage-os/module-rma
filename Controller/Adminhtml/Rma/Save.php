@@ -14,6 +14,7 @@ use Magento\Backend\App\Action\Context;
 use Magento\Framework\App\Request\DataPersistorInterface;
 use Magento\Framework\Controller\Result\Redirect;
 use Magento\Framework\Controller\ResultInterface;
+use Magento\Sales\Api\Data\OrderInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Exception;
@@ -128,15 +129,15 @@ class Save extends BaseController implements HttpPostActionInterface
 
         $model = $this->buildNewRma($data, $order);
 
-        return $this->saveAndRedirect($resultRedirect, $model, $data, 0, $selectedItems);
+        return $this->saveAndRedirect($resultRedirect, $model, $data, 0, $selectedItems, $order);
     }
 
     /**
      * @param array $data
-     * @param object $order
+     * @param OrderInterface $order
      * @return RMAInterface
      */
-    protected function buildNewRma(array $data, object $order): RMAInterface
+    protected function buildNewRma(array $data, OrderInterface $order): RMAInterface
     {
         $model = $this->rmaFactory->create();
         $model->setOrderId((int)$order->getEntityId());
@@ -157,6 +158,7 @@ class Save extends BaseController implements HttpPostActionInterface
      * @param array $data
      * @param int $id
      * @param array $selectedItems
+     * @param OrderInterface|null $order
      * @return ResultInterface
      */
     protected function saveAndRedirect(
@@ -164,13 +166,14 @@ class Save extends BaseController implements HttpPostActionInterface
         RMAInterface $model,
         array $data,
         int $id,
-        array $selectedItems = []
+        array $selectedItems = [],
+        ?OrderInterface $order = null
     ): ResultInterface {
         try {
             $this->rmaRepository->save($model);
 
-            if (!empty($selectedItems)) {
-                $this->rmaSubmitService->saveItems((int)$model->getEntityId(), $selectedItems);
+            if (!empty($selectedItems) && $order !== null) {
+                $this->rmaSubmitService->saveItems((int)$model->getEntityId(), $selectedItems, $order);
             }
 
             $this->messageManager->addSuccessMessage(__('You saved the RMA request.'));

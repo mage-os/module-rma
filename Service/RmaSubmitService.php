@@ -116,7 +116,7 @@ class RmaSubmitService
 
         $this->rmaRepository->save($rma);
         $rmaId = (int)$rma->getEntityId();
-        $this->saveItems($rmaId, $selectedItems);
+        $this->saveItems($rmaId, $selectedItems, $order);
         $this->attachmentService->saveFromJson($attachmentsJson, $rmaId);
 
         return $rma;
@@ -125,12 +125,25 @@ class RmaSubmitService
     /**
      * @param int $rmaId
      * @param array $selectedItems
+     * @param OrderInterface $order
      * @return void
      * @throws CouldNotSaveException
+     * @throws LocalizedException
      */
-    public function saveItems(int $rmaId, array $selectedItems): void
+    public function saveItems(int $rmaId, array $selectedItems, OrderInterface $order): void
     {
+        $validOrderItemIds = [];
+        foreach ($order->getItems() as $orderItem) {
+            $validOrderItemIds[] = (int)$orderItem->getItemId();
+        }
+
         foreach ($selectedItems as $orderItemId => $itemData) {
+            if (!in_array($orderItemId, $validOrderItemIds, true)) {
+                throw new LocalizedException(
+                    __('Item ID %1 does not belong to order #%2.', $orderItemId, $order->getIncrementId())
+                );
+            }
+
             $item = $this->itemFactory->create();
             $item->setRmaId($rmaId);
             $item->setOrderItemId($orderItemId);
