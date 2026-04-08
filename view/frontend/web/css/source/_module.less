@@ -69,4 +69,146 @@
             white-space: nowrap;
         }
     }
+
+    .box-rma-attachments {
+        margin-top: 15px;
+    }
+}
+
+// Upload widget
+.rma-upload-dropzone {
+    border: 2px dashed @color-gray76;
+    border-radius: 6px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    background: @color-gray-light0;
+
+    .rma-comment-form & {
+        padding: 12px;
+        margin-top: 8px;
+    }
+}
+
+.rma-upload-dropzone-text {
+    margin: 0;
+    color: @color-gray60;
+}
+
+.rma-upload-dropzone-hint {
+    margin: 4px 0 0;
+    font-size: @font-size__xs;
+    color: @color-gray46;
+
+    .rma-comment-form & {
+        font-size: @font-size__xs;
+    }
+}
+
+.rma-upload-input {
+    display: none;
+}
+
+.rma-upload-list {
+    margin-top: 8px;
+
+    .rma-comment-form & {
+        margin-top: 4px;
+    }
+}
+
+// Comments timeline
+.rma-comments-timeline {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid @color-gray80;
+    padding: 10px;
+    margin-bottom: 15px;
+    background: @color-gray-light0;
+}
+
+.rma-no-comments {
+    color: @color-gray46;
+    font-style: italic;
+}
+
+.rma-comment {
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+
+    &.customer {
+        background: #e8f4e8;
+        margin-left: 20px;
+    }
+
+    &.admin {
+        background: @color-white;
+        margin-right: 20px;
+        border: 1px solid @color-gray80;
+    }
+}
+
+.rma-comment-meta {
+    font-size: @font-size__xs;
+    color: @color-gray60;
+    margin-bottom: 4px;
+}
+
+.rma-comment-badge {
+    margin-left: 4px;
+    font-size: 10px;
+    color: @link__color;
+}
+
+.rma-comment-date {
+    margin-left: 8px;
+}
+
+.rma-comment-body {
+    white-space: pre-wrap;
+}
+
+.rma-comment-attachments {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.rma-comment-attachment-item {
+    font-size: @font-size__xs;
+    margin-top: 3px;
+}
+
+.rma-comment-form .actions-toolbar {
+    margin-top: 8px;
+}
+
+// Attachment links
+.rma-attachment-link {
+    color: @link__color;
+    text-decoration: none;
+}
+
+// Attachment list (view page)
+.rma-attachment-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.rma-attachment-item {
+    padding: 6px 0;
+    border-bottom: 1px solid @color-gray90;
+}
+
+.rma-attachment-size {
+    color: @color-gray46;
+    font-size: @font-size__s;
+}
+
+.rma-no-attachments {
+    color: @color-gray46;
+    font-style: italic;
+    padding: 6px 0;
 }

@@ -26,28 +26,27 @@ $downloadUrl = $block->getDownloadUrl();
         <strong><?= $escaper->escapeHtml(__('Comments')) ?></strong>
     </div>
     <div class="block-content">
-        <div id="rma-comments-timeline" class="rma-comments-timeline" style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; margin-bottom: 15px; background: #fafafa;">
+        <div id="rma-comments-timeline" class="rma-comments-timeline">
             <?php if (empty($comments)): ?>
-                <p class="rma-no-comments" style="color: #999; font-style: italic;"><?= $escaper->escapeHtml(__('No comments yet. Start the conversation!')) ?></p>
+                <p class="rma-no-comments"><?= $escaper->escapeHtml(__('No comments yet. Start the conversation!')) ?></p>
             <?php else: ?>
                 <?php foreach ($comments as $comment): ?>
                     <div class="rma-comment <?= $escaper->escapeHtmlAttr($comment['author_type']) ?>"
-                         data-comment-id="<?= (int)$comment['entity_id'] ?>"
-                         style="margin-bottom: 10px; padding: 8px 12px; border-radius: 6px; <?= $comment['author_type'] === 'customer' ? 'background: #e8f4e8; margin-left: 20px;' : 'background: #fff; margin-right: 20px; border: 1px solid #ddd;' ?>">
-                        <div style="font-size: 11px; color: #666; margin-bottom: 4px;">
+                         data-comment-id="<?= (int)$comment['entity_id'] ?>">
+                        <div class="rma-comment-meta">
                             <strong><?= $escaper->escapeHtml($comment['author_name']) ?></strong>
                             <?php if ($comment['author_type'] === 'admin'): ?>
-                                <span style="margin-left: 4px; font-size: 10px; color: #1979c3;"><?= $escaper->escapeHtml(__('Support')) ?></span>
+                                <span class="rma-comment-badge"><?= $escaper->escapeHtml(__('Support')) ?></span>
                             <?php endif; ?>
-                            <span style="margin-left: 8px;"><?= $escaper->escapeHtml($comment['created_at']) ?></span>
+                            <span class="rma-comment-date"><?= $escaper->escapeHtml($comment['created_at']) ?></span>
                         </div>
-                        <div style="white-space: pre-wrap;"><?= $escaper->escapeHtml($comment['comment']) ?></div>
+                        <div class="rma-comment-body"><?= $escaper->escapeHtml($comment['comment']) ?></div>
                         <?php if (!empty($comment['attachments'])): ?>
-                            <div class="rma-comment-attachments" style="margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(0,0,0,0.1);">
+                            <div class="rma-comment-attachments">
                                 <?php foreach ($comment['attachments'] as $att): ?>
-                                    <div style="font-size: 11px; margin-top: 3px;">
+                                    <div class="rma-comment-attachment-item">
                                         <a href="<?= $escaper->escapeUrl($downloadUrl . (str_contains($downloadUrl, '?') ? '&' : '?') . 'id=' . (int)$att['entity_id']) ?>"
-                                           target="_blank" style="color: #1979c3; text-decoration: none;">
+                                           target="_blank" class="rma-attachment-link">
                                             &#128206; <?= $escaper->escapeHtml($att['file_name']) ?>
                                         </a>
                                     </div>
@@ -72,17 +71,17 @@ $downloadUrl = $block->getDownloadUrl();
                      "maxFiles": <?= (int)$block->getMaxFiles() ?>,
                      "formKey": "<?= $escaper->escapeJs($block->getFormKey()) ?>"
                  }}'>
-                <div class="rma-upload-dropzone" style="border: 2px dashed #ccc; border-radius: 6px; padding: 12px; text-align: center; cursor: pointer; background: #fafafa; margin-top: 8px;">
-                    <p style="margin: 0; color: #666; font-size: 12px;"><?= $escaper->escapeHtml(__('Drag & drop files here or click to browse')) ?></p>
-                    <p style="margin: 4px 0 0; font-size: 11px; color: #999;">
+                <div class="rma-upload-dropzone">
+                    <p class="rma-upload-dropzone-text"><?= $escaper->escapeHtml(__('Drag & drop files here or click to browse')) ?></p>
+                    <p class="rma-upload-dropzone-hint">
                         <?= $escaper->escapeHtml(__('Allowed: %1 | Max size: %2 MB | Max files: %3', $block->getAllowedExtensions(), $block->getMaxFileSize(), $block->getMaxFiles())) ?>
                     </p>
                 </div>
-                <input type="file" class="rma-upload-input" style="display: none;" multiple/>
-                <div class="rma-upload-list" style="margin-top: 4px;"></div>
+                <input type="file" class="rma-upload-input" multiple/>
+                <div class="rma-upload-list"></div>
                 <input type="hidden" class="rma-upload-data" value="[]"/>
             </div>
-            <div class="actions-toolbar" style="margin-top: 8px;">
+            <div class="actions-toolbar">
                 <div class="primary">
                     <button type="button" id="rma-comment-submit" class="action submit primary">
                         <span><?= $escaper->escapeHtml(__('Send')) ?></span>

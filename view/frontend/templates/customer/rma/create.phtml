@@ -98,14 +98,14 @@ $conditions = $block->getConditions();
                                  "maxFiles": <?= (int)$block->getMaxFiles() ?>,
                                  "formKey": "<?= $escaper->escapeJs($block->getFormKey()) ?>"
                              }}'>
-                            <div class="rma-upload-dropzone" style="border: 2px dashed #ccc; border-radius: 6px; padding: 20px; text-align: center; cursor: pointer; background: #fafafa;">
-                                <p style="margin: 0; color: #666;"><?= $escaper->escapeHtml(__('Drag & drop files here or click to browse')) ?></p>
-                                <p style="margin: 4px 0 0; font-size: 11px; color: #999;">
+                            <div class="rma-upload-dropzone">
+                                <p class="rma-upload-dropzone-text"><?= $escaper->escapeHtml(__('Drag & drop files here or click to browse')) ?></p>
+                                <p class="rma-upload-dropzone-hint">
                                     <?= $escaper->escapeHtml(__('Allowed: %1 | Max size: %2 MB | Max files: %3', $block->getAllowedExtensions(), $block->getMaxFileSize(), $block->getMaxFiles())) ?>
                                 </p>
                             </div>
-                            <input type="file" class="rma-upload-input" style="display: none;" multiple/>
-                            <div class="rma-upload-list" style="margin-top: 8px;"></div>
+                            <input type="file" class="rma-upload-input" multiple/>
+                            <div class="rma-upload-list"></div>
                             <input type="hidden" name="attachments" class="rma-upload-data" value="[]"/>
                         </div>
                     </div>

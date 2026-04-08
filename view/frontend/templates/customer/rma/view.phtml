@@ -101,24 +101,24 @@ $attachments = $block->getAttachments();
             </div>
         <?php endif; ?>
 
-        <div class="box box-rma-attachments" style="margin-top: 15px;">
+        <div class="box box-rma-attachments">
             <strong class="box-title">
                 <span><?= $escaper->escapeHtml(__('Attachments')) ?></span>
             </strong>
             <div class="box-content">
-                <ul id="rma-all-attachments" style="list-style: none; padding: 0; margin: 0;">
+                <ul id="rma-all-attachments" class="rma-attachment-list">
                     <?php if (empty($attachments)): ?>
-                        <li class="rma-no-attachments" style="color: #999; font-style: italic; padding: 6px 0;">
+                        <li class="rma-no-attachments">
                             <?= $escaper->escapeHtml(__('No attachments yet.')) ?>
                         </li>
                     <?php else: ?>
                         <?php foreach ($attachments as $att): ?>
-                            <li data-attachment-id="<?= (int)$att['entity_id'] ?>" style="padding: 6px 0; border-bottom: 1px solid #eee;">
+                            <li class="rma-attachment-item" data-attachment-id="<?= (int)$att['entity_id'] ?>">
                                 <a href="<?= $escaper->escapeUrl($block->getDownloadUrl((int)$att['entity_id'])) ?>"
-                                   style="color: #1979c3; text-decoration: none;">
+                                   class="rma-attachment-link">
                                     &#128206; <?= $escaper->escapeHtml($att['file_name']) ?>
                                 </a>
-                                <span style="color: #999; font-size: 12px;">
+                                <span class="rma-attachment-size">
                                     (<?= $escaper->escapeHtml($att['file_size_label']) ?>)
                                 </span>
                             </li>
