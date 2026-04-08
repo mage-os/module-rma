@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MageOS\RMA\Model;
 
 use MageOS\RMA\Api\RMARepositoryInterface;
-use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\Api\SearchCriteriaBuilderFactory;
 use Magento\Framework\Api\SearchCriteriaInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 
@@ -13,11 +13,11 @@ abstract class AbstractRmaManagement
 {
     /**
      * @param RMARepositoryInterface $rmaRepository
-     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param SearchCriteriaBuilderFactory $searchCriteriaBuilderFactory
      */
     public function __construct(
         protected readonly RMARepositoryInterface $rmaRepository,
-        protected readonly SearchCriteriaBuilder $searchCriteriaBuilder
+        protected readonly SearchCriteriaBuilderFactory $searchCriteriaBuilderFactory
     ) {
     }
 
@@ -39,7 +39,8 @@ abstract class AbstractRmaManagement
         int $rmaId,
         SearchCriteriaInterface $searchCriteria
     ): SearchCriteriaInterface {
-        $this->searchCriteriaBuilder->addFilter('rma_id', $rmaId);
+        $builder = $this->searchCriteriaBuilderFactory->create();
+        $builder->addFilter('rma_id', $rmaId);
 
         foreach ($searchCriteria->getFilterGroups() as $filterGroup) {
             $filters = array_filter(
@@ -48,13 +49,13 @@ abstract class AbstractRmaManagement
             );
 
             if (!empty($filters)) {
-                $this->searchCriteriaBuilder->addFilters($filters);
+                $builder->addFilters($filters);
             }
         }
 
         if ($searchCriteria->getSortOrders()) {
             foreach ($searchCriteria->getSortOrders() as $sortOrder) {
-                $this->searchCriteriaBuilder->addSortOrder(
+                $builder->addSortOrder(
                     $sortOrder->getField(),
                     $sortOrder->getDirection()
                 );
@@ -62,13 +63,13 @@ abstract class AbstractRmaManagement
         }
 
         if ($searchCriteria->getPageSize()) {
-            $this->searchCriteriaBuilder->setPageSize($searchCriteria->getPageSize());
+            $builder->setPageSize($searchCriteria->getPageSize());
         }
 
         if ($searchCriteria->getCurrentPage()) {
-            $this->searchCriteriaBuilder->setCurrentPage($searchCriteria->getCurrentPage());
+            $builder->setCurrentPage($searchCriteria->getCurrentPage());
         }
 
-        return $this->searchCriteriaBuilder->create();
+        return $builder->create();
     }
 }

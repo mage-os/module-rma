@@ -10,7 +10,7 @@ use MageOS\RMA\Api\ItemRepositoryInterface;
 use MageOS\RMA\Api\RMARepositoryInterface;
 use MageOS\RMA\Api\RmaItemManagementInterface;
 use Magento\Framework\Api\SearchCriteriaInterface;
-use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\Api\SearchCriteriaBuilderFactory;
 use Magento\Framework\Exception\CouldNotDeleteException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\LocalizedException;
@@ -20,15 +20,15 @@ class RmaItemManagement extends AbstractRmaManagement implements RmaItemManageme
 {
     /**
      * @param RMARepositoryInterface $rmaRepository
-     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param SearchCriteriaBuilderFactory $searchCriteriaBuilderFactory
      * @param ItemRepositoryInterface $itemRepository
      */
     public function __construct(
         RMARepositoryInterface $rmaRepository,
-        SearchCriteriaBuilder $searchCriteriaBuilder,
+        SearchCriteriaBuilderFactory $searchCriteriaBuilderFactory,
         protected readonly ItemRepositoryInterface $itemRepository
     ) {
-        parent::__construct($rmaRepository, $searchCriteriaBuilder);
+        parent::__construct($rmaRepository, $searchCriteriaBuilderFactory);
     }
 
     /**
