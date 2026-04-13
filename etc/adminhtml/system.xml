@@ -65,9 +65,10 @@
             </group>
             <group id="attachments" translate="label" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="0">
                 <label>Attachments</label>
-                <field id="allowed_extensions" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="allowed_extensions" translate="label" type="multiselect" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Allowed File Extensions</label>
-                    <comment>Comma-separated list of allowed file extensions (e.g. jpg,png,pdf,mp4).</comment>
+                    <source_model>MageOS\RMA\Model\Config\Source\AllowedExtensions</source_model>
+                    <can_be_empty>0</can_be_empty>
                 </field>
                 <field id="max_file_size" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Maximum File Size (MB)</label>

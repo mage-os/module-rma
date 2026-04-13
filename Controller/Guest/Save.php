@@ -77,7 +77,7 @@ class Save implements HttpPostActionInterface
                 $order,
                 null,
                 (string)$order->getCustomerEmail(),
-                (string)($order->getBillingAddress()->getName() ?: __('Guest')),
+                (string)($order->getBillingAddress()?->getName() ?: __('Guest')),
                 (int)($data['reason_id'] ?? 0),
                 (int)($data['resolution_type_id'] ?? 0),
                 $selectedItems,
