@@ -18,6 +18,7 @@ use Magento\Framework\Filesystem;
 use Magento\Framework\Filesystem\Directory\WriteInterface;
 use Magento\Framework\Serialize\Serializer\Json as JsonSerializer;
 use Magento\MediaStorage\Model\File\UploaderFactory;
+use MageOS\RMA\Model\Config\Source\AllowedExtensions;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 
@@ -73,6 +74,10 @@ class AttachmentService
         $uploader->setAllowedExtensions($this->moduleConfig->getAllowedAttachmentExtensions());
         $uploader->setAllowRenameFiles(true);
         $uploader->setFilesDispersion(false);
+
+        if (!$uploader->checkMimeType($this->getAllowedMimeTypes())) {
+            throw new LocalizedException(__('File type not allowed.'));
+        }
 
         $tmpPath = $this->varDirectory->getAbsolutePath(self::BASE_TMP_PATH);
         $result = $uploader->save($tmpPath);
@@ -267,6 +272,23 @@ class AttachmentService
         }
 
         return round($bytes / self::BYTES_PER_MB, 1) . ' MB';
+    }
+
+    /**
+     * Returns the MIME types permitted for the currently configured extensions.
+     *
+     * @return string[]
+     */
+    private function getAllowedMimeTypes(): array
+    {
+        $allowed = [];
+        foreach ($this->moduleConfig->getAllowedAttachmentExtensions() as $ext) {
+            if (isset(AllowedExtensions::EXTENSION_MIME_MAP[$ext])) {
+                array_push($allowed, ...AllowedExtensions::EXTENSION_MIME_MAP[$ext]);
+            }
+        }
+
+        return array_unique($allowed);
     }
 
     /**

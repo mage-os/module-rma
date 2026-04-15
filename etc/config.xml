@@ -12,7 +12,7 @@
                 <allowed_order_statuses>complete</allowed_order_statuses>
             </policy>
             <attachments>
-                <allowed_extensions>jpg,jpeg,png,gif,webp,mp4,mov,pdf,doc,docx,zip</allowed_extensions>
+                <allowed_extensions>jpg,jpeg,png,gif,webp,mp4,mov,pdf,doc,docx</allowed_extensions>
                 <max_file_size>10</max_file_size>
                 <max_files>5</max_files>
             </attachments>
