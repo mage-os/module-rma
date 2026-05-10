@@ -3,7 +3,7 @@
     <default>
         <rma>
             <general>
-                <enabled>1</enabled>
+                <enabled>0</enabled>
                 <increment_id_prefix>RMA-</increment_id_prefix>
                 <return_period>30</return_period>
             </general>

@@ -28,7 +28,7 @@ Module settings are located at **Stores > Configuration > Sales > RMA - Return M
 
 | Field | Type | Default | Description |
 |---|---|---|---|
-| Enable RMA | Yes/No | Yes | Enable or disable the RMA feature (scope: website) |
+| Enable RMA | Yes/No | No | Enable or disable the RMA feature (scope: website) |
 | Increment ID Prefix | Text | `RMA-` | Prefix for the return increment ID (e.g. `RMA-000001`) |
 | Return Period (Days) | Numeric | `30` | Number of days after order placement within which a return can be requested |
 
