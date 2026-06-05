@@ -1,6 +1,10 @@
 # Changelog
 
-## [2.3.0] - Unreleased
+## [2.3.1]
+### Fixed
+- Fix unqualified column reference in customer RMA list (#36)
+
+## [2.3.0] - 2026-05-10
 
 ### Changed
 - **Enable RMA** system configuration default switched from `Yes` to `No` at installation — RMA feature must now be explicitly enabled by the admin after install (#34)

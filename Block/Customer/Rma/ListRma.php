@@ -48,7 +48,7 @@ class ListRma extends Template
         if ($this->rmaCollection === null) {
             $this->rmaCollection = $this->collectionFactory->create();
             $this->rmaCollection->joinSalesOrder();
-            $this->rmaCollection->addFieldToFilter('customer_id', $customerId);
+            $this->rmaCollection->addFieldToFilter('main_table.customer_id', $customerId);
             $this->rmaCollection->setOrder('created_at', 'desc');
         }
 
