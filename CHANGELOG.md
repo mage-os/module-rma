@@ -1,6 +1,14 @@
 # Changelog
 
-## [2.3.1]
+## [2.3.2] - 2026-06-18
+
+### Fixed
+- Shortened long DB constraint names to comply with database limitations
+
+### Added
+- **Romanian translations** for UI, emails, and configuration
+
+## [2.3.1] - 2026-06-05
 ### Fixed
 - Fix unqualified column reference in customer RMA list (#36)
 

@@ -147,7 +147,7 @@
         },
         "constraint": {
             "PRIMARY": true,
-            "RMA_RESOLUTION_TYPE_LABEL_RESOLUTION_TYPE_ID_RMA_RESOLUTION_TYPE_ENTITY_ID": true,
+            "RMA_RES_TYPE_LABEL_RES_TYPE_ID_RMA_RES_TYPE_ENTITY_ID": true,
             "RMA_RESOLUTION_TYPE_LABEL_STORE_ID_STORE_STORE_ID": true
         },
         "index": {
@@ -162,7 +162,7 @@
         },
         "constraint": {
             "PRIMARY": true,
-            "RMA_ITEM_CONDITION_LABEL_CONDITION_ID_RMA_ITEM_CONDITION_ENTITY_ID": true,
+            "RMA_ITEM_COND_LABEL_COND_ID_RMA_ITEM_COND_ENTITY_ID": true,
             "RMA_ITEM_CONDITION_LABEL_STORE_ID_STORE_STORE_ID": true
         },
         "index": {

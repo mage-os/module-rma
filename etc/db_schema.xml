@@ -214,7 +214,7 @@
             <column name="resolution_type_id"/>
             <column name="store_id"/>
         </constraint>
-        <constraint xsi:type="foreign" referenceId="RMA_RESOLUTION_TYPE_LABEL_RESOLUTION_TYPE_ID_RMA_RESOLUTION_TYPE_ENTITY_ID"
+        <constraint xsi:type="foreign" referenceId="RMA_RES_TYPE_LABEL_RES_TYPE_ID_RMA_RES_TYPE_ENTITY_ID"
                     table="rma_resolution_type_label" column="resolution_type_id"
                     referenceTable="rma_resolution_type" referenceColumn="entity_id"
                     onDelete="CASCADE"/>
@@ -236,7 +236,7 @@
             <column name="condition_id"/>
             <column name="store_id"/>
         </constraint>
-        <constraint xsi:type="foreign" referenceId="RMA_ITEM_CONDITION_LABEL_CONDITION_ID_RMA_ITEM_CONDITION_ENTITY_ID"
+        <constraint xsi:type="foreign" referenceId="RMA_ITEM_COND_LABEL_COND_ID_RMA_ITEM_COND_ENTITY_ID"
                     table="rma_item_condition_label" column="condition_id"
                     referenceTable="rma_item_condition" referenceColumn="entity_id"
                     onDelete="CASCADE"/>
