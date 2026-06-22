@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MageOS\RMA\Service;
 
+use Magento\Framework\Event\ManagerInterface as EventManagerInterface;
 use MageOS\RMA\Api\Data\RMAInterface;
 use MageOS\RMA\Api\Data\RMAInterfaceFactory;
 use MageOS\RMA\Api\Data\StatusInterface;
@@ -41,7 +42,8 @@ class RmaSubmitService
         protected readonly ModuleConfig $moduleConfig,
         protected readonly AttachmentService $attachmentService,
         protected readonly OrderEligibility $orderEligibility,
-        protected readonly ResourceConnection $resourceConnection
+        protected readonly ResourceConnection $resourceConnection,
+        protected readonly EventManagerInterface $eventManager,
     ) {
     }
 
@@ -130,6 +132,7 @@ class RmaSubmitService
             $this->saveItems($rmaId, $selectedItems, $order);
             $this->attachmentService->saveFromJson($attachmentsJson, $rmaId);
             $connection->commit();
+            $this->eventManager->dispatch('rma_commit_after', ['rma' => $rma]);
         } catch (Throwable $e) {
             $connection->rollBack();
             throw $e;

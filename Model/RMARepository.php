@@ -95,6 +95,7 @@ class RMARepository implements RMARepositoryInterface
 
         try {
             $this->resourceModel->save($rma);
+            $rma->setData('is_new', $isNew);
         } catch (Exception $e) {
             throw new CouldNotSaveException(__('Could not save the RMA: %1', $e->getMessage()), $e);
         }

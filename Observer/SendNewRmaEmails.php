@@ -43,6 +43,10 @@ class SendNewRmaEmails implements ObserverInterface
             return;
         }
 
+        if (!$rma->getData('is_new')) {
+            return;
+        }
+
         try {
             $this->sender->sendCustomerNewRmaEmail($rma);
         } catch (Exception $e) {

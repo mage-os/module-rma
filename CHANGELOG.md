@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.3.3] - 2026-06-22
+
+### Fixed
+- Add a new event (`rma_commit_after`) to use for sending new RMA emails. This fixes the issue #39
+
 ## [2.3.2] - 2026-06-18
 
 ### Fixed
