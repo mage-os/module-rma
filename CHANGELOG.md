@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.4.0] - 2026-07-05
+
+### Added
+- Guest-form RMA requests are now linked to the customer account when the order belongs to a registered customer, so they appear in "My Returns"
+
+### Fixed
+- **[i18n]** Lookup labels (status, reason, resolution type, item condition) now translated in transactional emails (store emulation in `Service\Email\Sender`) and frontend selects (`__()` in `AbstractLookupSource::toOptionArray()`); seed label translations added to all i18n CSVs
+- **[Code Quality]** `TypeError` on repository `getList()` — dedicated SearchResults classes in `Model/Data/` wired via `di.xml` preferences
+
 ## [2.3.3] - 2026-06-22
 
 ### Fixed
