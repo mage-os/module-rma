@@ -59,7 +59,7 @@ abstract class AbstractLookupSource implements OptionSourceInterface
                 $label = $storeLabelMap[$entityId] ?? $entity->getLabel();
                 $this->options[] = [
                     'value' => $entityId,
-                    'label' => $label,
+                    'label' => (string)__($label),
                 ];
             }
         }

@@ -47,7 +47,7 @@ class LabelResolver
         try {
             $entity = $this->loadEntity($type, $entityId);
 
-            return $entity->getStoreLabel($storeId);
+            return (string)__($entity->getStoreLabel($storeId));
         } catch (NoSuchEntityException) {
             return '';
         }
@@ -69,7 +69,7 @@ class LabelResolver
             return [
                 'id' => $entity->getEntityId(),
                 'code' => $entity->getCode(),
-                'label' => $entity->getStoreLabel($storeId),
+                'label' => (string)__($entity->getStoreLabel($storeId)),
             ];
         } catch (NoSuchEntityException) {
             return null;

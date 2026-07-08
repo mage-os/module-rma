@@ -18,6 +18,7 @@ use Magento\Framework\App\Area;
 use Magento\Framework\Mail\Template\TransportBuilder;
 use Magento\Sales\Api\OrderItemRepositoryInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
+use Magento\Store\Model\App\Emulation;
 use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -39,6 +40,7 @@ class Sender implements SenderInterface
      * @param ImageHelper $imageHelper
      * @param ItemConditionRepositoryInterface $itemConditionRepository
      * @param StatusRepositoryInterface $statusRepository
+     * @param Emulation $appEmulation
      */
     public function __construct(
         protected readonly TransportBuilder $transportBuilder,
@@ -53,7 +55,8 @@ class Sender implements SenderInterface
         protected readonly ProductRepositoryInterface $productRepository,
         protected readonly ImageHelper $imageHelper,
         protected readonly ItemConditionRepositoryInterface $itemConditionRepository,
-        protected readonly StatusRepositoryInterface $statusRepository
+        protected readonly StatusRepositoryInterface $statusRepository,
+        protected readonly Emulation $appEmulation
     ) {
     }
 
@@ -71,7 +74,7 @@ class Sender implements SenderInterface
 
         $templateId = $this->moduleConfig->getCustomerNewTemplate($storeId);
 
-        $this->sendRmaEmail($rma, $templateId, $rma->getCustomerEmail(), $rma->getCustomerName(), [
+        $this->sendRmaEmail($rma, $templateId, $rma->getCustomerEmail(), $rma->getCustomerName(), fn(): array => [
             'rma_reason_label' => $this->getReasonLabel($rma),
             'rma_resolution_label' => $this->getResolutionLabel($rma),
             'rma_items' => $this->getRmaItemsData($rma),
@@ -92,10 +95,9 @@ class Sender implements SenderInterface
         }
 
         $templateId = $this->moduleConfig->getCustomerStatusChangeTemplate($storeId);
-        $statusLabel = $this->getStatusLabel($newStatusId, $storeId);
 
-        $this->sendRmaEmail($rma, $templateId, $rma->getCustomerEmail(), $rma->getCustomerName(), [
-            'rma_status_label' => $statusLabel,
+        $this->sendRmaEmail($rma, $templateId, $rma->getCustomerEmail(), $rma->getCustomerName(), fn(): array => [
+            'rma_status_label' => $this->getStatusLabel($newStatusId, $storeId),
         ]);
     }
 
@@ -118,7 +120,7 @@ class Sender implements SenderInterface
             return;
         }
 
-        $this->sendRmaEmail($rma, $templateId, $adminEmail, 'Admin', [
+        $this->sendRmaEmail($rma, $templateId, $adminEmail, 'Admin', fn(): array => [
             'customer_email' => $rma->getCustomerEmail(),
             'rma_reason_label' => $this->getReasonLabel($rma),
             'rma_resolution_label' => $this->getResolutionLabel($rma),
@@ -130,7 +132,7 @@ class Sender implements SenderInterface
      * @param string $templateId
      * @param string $recipientEmail
      * @param string $recipientName
-     * @param array $extraVars
+     * @param callable|null $extraVarsProvider
      * @return void
      */
     protected function sendRmaEmail(
@@ -138,11 +140,14 @@ class Sender implements SenderInterface
         string $templateId,
         string $recipientEmail,
         string $recipientName,
-        array $extraVars = []
+        ?callable $extraVarsProvider = null
     ): void {
         $storeId = (int)$rma->getStoreId();
 
+        $this->appEmulation->startEnvironmentEmulation($storeId, Area::AREA_FRONTEND, true);
+
         try {
+            $extraVars = $extraVarsProvider !== null ? $extraVarsProvider() : [];
             $templateVars = array_merge($this->getBaseTemplateVars($rma), $extraVars);
 
             $transport = $this->transportBuilder
@@ -163,6 +168,8 @@ class Sender implements SenderInterface
                 'rma_id' => $rma->getEntityId(),
                 'error' => $e->getMessage(),
             ]);
+        } finally {
+            $this->appEmulation->stopEnvironmentEmulation();
         }
     }
 
@@ -259,7 +266,7 @@ class Sender implements SenderInterface
 
         try {
             $condition = $this->itemConditionRepository->get($conditionId);
-            return $condition->getStoreLabel($storeId);
+            return (string)__($condition->getStoreLabel($storeId));
         } catch (NoSuchEntityException) {
             return '';
         }
@@ -273,7 +280,7 @@ class Sender implements SenderInterface
     {
         try {
             $reason = $this->reasonRepository->get($rma->getReasonId());
-            return $reason->getStoreLabel((int)$rma->getStoreId());
+            return (string)__($reason->getStoreLabel((int)$rma->getStoreId()));
         } catch (NoSuchEntityException) {
             return '';
         }
@@ -287,7 +294,7 @@ class Sender implements SenderInterface
     {
         try {
             $resolutionType = $this->resolutionTypeRepository->get($rma->getResolutionTypeId());
-            return $resolutionType->getStoreLabel((int)$rma->getStoreId());
+            return (string)__($resolutionType->getStoreLabel((int)$rma->getStoreId()));
         } catch (NoSuchEntityException) {
             return '';
         }
@@ -302,7 +309,7 @@ class Sender implements SenderInterface
     {
         try {
             $status = $this->statusRepository->get($statusId);
-            return $status->getStoreLabel($storeId);
+            return (string)__($status->getStoreLabel($storeId));
         } catch (NoSuchEntityException) {
             return (string)__('Unknown');
         }

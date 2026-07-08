@@ -11,14 +11,14 @@
     <preference for="MageOS\RMA\Api\Data\AttachmentInterface" type="MageOS\RMA\Model\Attachment"/>
 
     <!-- SearchResults Interfaces -->
-    <preference for="MageOS\RMA\Api\Data\RMASearchResultsInterface" type="Magento\Framework\Api\SearchResults"/>
-    <preference for="MageOS\RMA\Api\Data\CommentSearchResultsInterface" type="Magento\Framework\Api\SearchResults"/>
-    <preference for="MageOS\RMA\Api\Data\StatusSearchResultsInterface" type="Magento\Framework\Api\SearchResults"/>
-    <preference for="MageOS\RMA\Api\Data\ReasonSearchResultsInterface" type="Magento\Framework\Api\SearchResults"/>
-    <preference for="MageOS\RMA\Api\Data\ResolutionTypeSearchResultsInterface" type="Magento\Framework\Api\SearchResults"/>
-    <preference for="MageOS\RMA\Api\Data\ItemConditionSearchResultsInterface" type="Magento\Framework\Api\SearchResults"/>
-    <preference for="MageOS\RMA\Api\Data\ItemSearchResultsInterface" type="Magento\Framework\Api\SearchResults"/>
-    <preference for="MageOS\RMA\Api\Data\AttachmentSearchResultsInterface" type="Magento\Framework\Api\SearchResults"/>
+    <preference for="MageOS\RMA\Api\Data\RMASearchResultsInterface" type="MageOS\RMA\Model\Data\RMASearchResults"/>
+    <preference for="MageOS\RMA\Api\Data\CommentSearchResultsInterface" type="MageOS\RMA\Model\Data\CommentSearchResults"/>
+    <preference for="MageOS\RMA\Api\Data\StatusSearchResultsInterface" type="MageOS\RMA\Model\Data\StatusSearchResults"/>
+    <preference for="MageOS\RMA\Api\Data\ReasonSearchResultsInterface" type="MageOS\RMA\Model\Data\ReasonSearchResults"/>
+    <preference for="MageOS\RMA\Api\Data\ResolutionTypeSearchResultsInterface" type="MageOS\RMA\Model\Data\ResolutionTypeSearchResults"/>
+    <preference for="MageOS\RMA\Api\Data\ItemConditionSearchResultsInterface" type="MageOS\RMA\Model\Data\ItemConditionSearchResults"/>
+    <preference for="MageOS\RMA\Api\Data\ItemSearchResultsInterface" type="MageOS\RMA\Model\Data\ItemSearchResults"/>
+    <preference for="MageOS\RMA\Api\Data\AttachmentSearchResultsInterface" type="MageOS\RMA\Model\Data\AttachmentSearchResults"/>
 
     <!-- Email -->
     <preference for="MageOS\RMA\Api\Email\SenderInterface" type="MageOS\RMA\Service\Email\Sender"/>

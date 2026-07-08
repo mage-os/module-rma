@@ -73,9 +73,10 @@ class Save implements HttpPostActionInterface
 
         try {
             $attachmentsJson = (string)($data['attachments'] ?? '');
+            $customerId = (int)$order->getCustomerId() ?: null;
             $rma = $this->rmaSubmitService->createRma(
                 $order,
-                null,
+                $customerId,
                 (string)$order->getCustomerEmail(),
                 (string)($order->getBillingAddress()?->getName() ?: __('Guest')),
                 (int)($data['reason_id'] ?? 0),
