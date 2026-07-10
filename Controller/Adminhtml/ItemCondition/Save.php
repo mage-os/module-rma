@@ -12,7 +12,7 @@ use Magento\Framework\App\Request\DataPersistorInterface;
 
 class Save extends AbstractLookupSave
 {
-    const string ADMIN_RESOURCE = 'MageOS_RMA::rma_item_condition';
+    const ADMIN_RESOURCE = 'MageOS_RMA::rma_item_condition';
 
     /**
      * @param Context $context

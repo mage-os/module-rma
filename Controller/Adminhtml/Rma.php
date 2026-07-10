@@ -6,7 +6,7 @@ namespace MageOS\RMA\Controller\Adminhtml;
 
 abstract class Rma extends AbstractLookupController
 {
-    const string ADMIN_RESOURCE = 'MageOS_RMA::rma_manage';
+    const ADMIN_RESOURCE = 'MageOS_RMA::rma_manage';
 
     /**
      * @return string

@@ -10,7 +10,7 @@ use Magento\Backend\App\Action\Context;
 
 class Delete extends AbstractLookupDelete
 {
-    const string ADMIN_RESOURCE = 'MageOS_RMA::rma_resolution_type';
+    const ADMIN_RESOURCE = 'MageOS_RMA::rma_resolution_type';
 
     /**
      * @param Context $context

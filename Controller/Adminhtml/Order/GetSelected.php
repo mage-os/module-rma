@@ -16,7 +16,7 @@ class GetSelected extends Action implements HttpGetActionInterface
 {
     use OrderOptionFormatter;
 
-    const string ADMIN_RESOURCE = 'MageOS_RMA::rma_manage';
+    const ADMIN_RESOURCE = 'MageOS_RMA::rma_manage';
 
     /**
      * @param Context $context

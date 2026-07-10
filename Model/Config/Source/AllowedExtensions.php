@@ -12,7 +12,7 @@ class AllowedExtensions implements OptionSourceInterface
      * Maps each supported extension to its permitted MIME types.
      * Keeping extension and MIME knowledge co-located avoids them drifting apart.
      */
-    const array EXTENSION_MIME_MAP = [
+    const EXTENSION_MIME_MAP = [
         'jpg'  => ['image/jpeg'],
         'jpeg' => ['image/jpeg'],
         'png'  => ['image/png'],

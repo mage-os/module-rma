@@ -9,16 +9,16 @@ namespace MageOS\RMA\Api\Data;
  */
 interface CommentInterface
 {
-    const string ENTITY_ID = 'entity_id';
-    const string RMA_ID = 'rma_id';
-    const string AUTHOR_TYPE = 'author_type';
-    const string AUTHOR_NAME = 'author_name';
-    const string COMMENT = 'comment';
-    const string IS_VISIBLE_TO_CUSTOMER = 'is_visible_to_customer';
-    const string CREATED_AT = 'created_at';
+    const ENTITY_ID = 'entity_id';
+    const RMA_ID = 'rma_id';
+    const AUTHOR_TYPE = 'author_type';
+    const AUTHOR_NAME = 'author_name';
+    const COMMENT = 'comment';
+    const IS_VISIBLE_TO_CUSTOMER = 'is_visible_to_customer';
+    const CREATED_AT = 'created_at';
 
-    const string AUTHOR_TYPE_CUSTOMER = 'customer';
-    const string AUTHOR_TYPE_ADMIN = 'admin';
+    const AUTHOR_TYPE_CUSTOMER = 'customer';
+    const AUTHOR_TYPE_ADMIN = 'admin';
 
     /**
      * @return int|null

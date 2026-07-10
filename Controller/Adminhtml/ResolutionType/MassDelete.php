@@ -11,7 +11,7 @@ use Magento\Ui\Component\MassAction\Filter;
 
 class MassDelete extends AbstractLookupMassDelete
 {
-    const string ADMIN_RESOURCE = 'MageOS_RMA::rma_resolution_type';
+    const ADMIN_RESOURCE = 'MageOS_RMA::rma_resolution_type';
 
     /**
      * @param Context $context

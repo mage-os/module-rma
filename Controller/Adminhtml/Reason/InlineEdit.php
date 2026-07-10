@@ -11,7 +11,7 @@ use Magento\Framework\Controller\Result\JsonFactory;
 
 class InlineEdit extends AbstractLookupInlineEdit
 {
-    const string ADMIN_RESOURCE = 'MageOS_RMA::rma_reason';
+    const ADMIN_RESOURCE = 'MageOS_RMA::rma_reason';
 
     /**
      * @param Context $context

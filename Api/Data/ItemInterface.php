@@ -9,15 +9,15 @@ namespace MageOS\RMA\Api\Data;
  */
 interface ItemInterface
 {
-    const string ENTITY_ID = 'entity_id';
-    const string RMA_ID = 'rma_id';
-    const string ORDER_ITEM_ID = 'order_item_id';
-    const string QTY_REQUESTED = 'qty_requested';
-    const string QTY_APPROVED = 'qty_approved';
-    const string QTY_RETURNED = 'qty_returned';
-    const string CONDITION_ID = 'condition_id';
-    const string CREATED_AT = 'created_at';
-    const string UPDATED_AT = 'updated_at';
+    const ENTITY_ID = 'entity_id';
+    const RMA_ID = 'rma_id';
+    const ORDER_ITEM_ID = 'order_item_id';
+    const QTY_REQUESTED = 'qty_requested';
+    const QTY_APPROVED = 'qty_approved';
+    const QTY_RETURNED = 'qty_returned';
+    const CONDITION_ID = 'condition_id';
+    const CREATED_AT = 'created_at';
+    const UPDATED_AT = 'updated_at';
 
     /**
      * @return int|null

@@ -13,10 +13,10 @@ use Magento\Store\Model\StoreManagerInterface;
 
 class LabelResolver
 {
-    const string TYPE_STATUS = 'status';
-    const string TYPE_REASON = 'reason';
-    const string TYPE_RESOLUTION_TYPE = 'resolution_type';
-    const string TYPE_ITEM_CONDITION = 'item_condition';
+    const TYPE_STATUS = 'status';
+    const TYPE_REASON = 'reason';
+    const TYPE_RESOLUTION_TYPE = 'resolution_type';
+    const TYPE_ITEM_CONDITION = 'item_condition';
 
     /**
      * @param StatusRepositoryInterface $statusRepository

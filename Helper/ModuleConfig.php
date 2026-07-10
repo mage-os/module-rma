@@ -10,29 +10,29 @@ use Magento\Store\Model\StoreManagerInterface;
 
 class ModuleConfig
 {
-    const string SECTION = 'rma/';
+    const SECTION = 'rma/';
 
-    const string GROUP_GENERAL = self::SECTION . 'general/';
-    const string GROUP_POLICY = self::SECTION . 'policy/';
-    const string GROUP_EMAIL = self::SECTION . 'email/';
-    const string GROUP_ATTACHMENTS = self::SECTION . 'attachments/';
+    const GROUP_GENERAL = self::SECTION . 'general/';
+    const GROUP_POLICY = self::SECTION . 'policy/';
+    const GROUP_EMAIL = self::SECTION . 'email/';
+    const GROUP_ATTACHMENTS = self::SECTION . 'attachments/';
 
-    const string XML_PATH_ENABLED = self::GROUP_GENERAL . 'enabled';
-    const string XML_PATH_INCREMENT_ID_PREFIX = self::GROUP_GENERAL . 'increment_id_prefix';
-    const string XML_PATH_RETURN_PERIOD = self::GROUP_GENERAL . 'return_period';
+    const XML_PATH_ENABLED = self::GROUP_GENERAL . 'enabled';
+    const XML_PATH_INCREMENT_ID_PREFIX = self::GROUP_GENERAL . 'increment_id_prefix';
+    const XML_PATH_RETURN_PERIOD = self::GROUP_GENERAL . 'return_period';
 
-    const string XML_PATH_AUTO_APPROVE = self::GROUP_POLICY . 'auto_approve';
-    const string XML_PATH_ALLOWED_ORDER_STATUSES = self::GROUP_POLICY . 'allowed_order_statuses';
+    const XML_PATH_AUTO_APPROVE = self::GROUP_POLICY . 'auto_approve';
+    const XML_PATH_ALLOWED_ORDER_STATUSES = self::GROUP_POLICY . 'allowed_order_statuses';
 
-    const string XML_PATH_SENDER_IDENTITY = self::GROUP_EMAIL . 'sender_identity';
-    const string XML_PATH_CUSTOMER_NEW_TEMPLATE = self::GROUP_EMAIL . 'customer_new_template';
-    const string XML_PATH_CUSTOMER_STATUS_CHANGE_TEMPLATE = self::GROUP_EMAIL . 'customer_status_change_template';
-    const string XML_PATH_ADMIN_NEW_TEMPLATE = self::GROUP_EMAIL . 'admin_new_template';
-    const string XML_PATH_ADMIN_NOTIFY_EMAIL = self::GROUP_EMAIL . 'admin_notify_email';
+    const XML_PATH_SENDER_IDENTITY = self::GROUP_EMAIL . 'sender_identity';
+    const XML_PATH_CUSTOMER_NEW_TEMPLATE = self::GROUP_EMAIL . 'customer_new_template';
+    const XML_PATH_CUSTOMER_STATUS_CHANGE_TEMPLATE = self::GROUP_EMAIL . 'customer_status_change_template';
+    const XML_PATH_ADMIN_NEW_TEMPLATE = self::GROUP_EMAIL . 'admin_new_template';
+    const XML_PATH_ADMIN_NOTIFY_EMAIL = self::GROUP_EMAIL . 'admin_notify_email';
 
-    const string XML_PATH_ALLOWED_EXTENSIONS = self::GROUP_ATTACHMENTS . 'allowed_extensions';
-    const string XML_PATH_MAX_FILE_SIZE = self::GROUP_ATTACHMENTS . 'max_file_size';
-    const string XML_PATH_MAX_FILES = self::GROUP_ATTACHMENTS . 'max_files';
+    const XML_PATH_ALLOWED_EXTENSIONS = self::GROUP_ATTACHMENTS . 'allowed_extensions';
+    const XML_PATH_MAX_FILE_SIZE = self::GROUP_ATTACHMENTS . 'max_file_size';
+    const XML_PATH_MAX_FILES = self::GROUP_ATTACHMENTS . 'max_files';
 
     /**
      * @param ScopeConfigInterface $scopeConfig

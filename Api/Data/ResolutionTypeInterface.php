@@ -9,11 +9,11 @@ namespace MageOS\RMA\Api\Data;
  */
 interface ResolutionTypeInterface
 {
-    const string ENTITY_ID = 'entity_id';
-    const string CODE = 'code';
-    const string LABEL = 'label';
-    const string IS_ACTIVE = 'is_active';
-    const string SORT_ORDER = 'sort_order';
+    const ENTITY_ID = 'entity_id';
+    const CODE = 'code';
+    const LABEL = 'label';
+    const IS_ACTIVE = 'is_active';
+    const SORT_ORDER = 'sort_order';
 
     /**
      * @return int|null
