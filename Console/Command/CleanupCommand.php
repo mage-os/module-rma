@@ -21,9 +21,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class CleanupCommand extends Command
 {
-    const string OPTION_DAYS = 'days';
-    const string OPTION_DRY_RUN = 'dry-run';
-    const array CLOSED_STATUSES = [
+    const OPTION_DAYS = 'days';
+    const OPTION_DRY_RUN = 'dry-run';
+    const CLOSED_STATUSES = [
         StatusCodes::RESOLVED,
         StatusCodes::REJECTED,
         StatusCodes::CANCELED_BY_CUSTOMER,

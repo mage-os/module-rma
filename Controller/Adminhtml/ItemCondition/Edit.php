@@ -11,7 +11,7 @@ use Magento\Framework\View\Result\PageFactory;
 
 class Edit extends AbstractLookupEdit
 {
-    const string ADMIN_RESOURCE = 'MageOS_RMA::rma_item_condition';
+    const ADMIN_RESOURCE = 'MageOS_RMA::rma_item_condition';
 
     /**
      * @param Context $context

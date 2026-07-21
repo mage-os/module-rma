@@ -3,11 +3,11 @@
     "description": "Return Merchandise Authorization",
     "type": "magento2-module",
     "require": {
-        "magento/framework": "*",
-        "magento/module-sales": "*",
-        "magento/module-webapi": "*",
-        "magento/module-graph-ql": "*",
-        "php": ">=8.3"
+        "magento/framework": "^103.0",
+        "magento/module-sales": "^103.0",
+        "magento/module-webapi": "^100.4",
+        "magento/module-graph-ql": "^100.4",
+        "php": "~8.2.0||~8.3.0||~8.4.0||~8.5.0"
     },
     "authors": [
         {

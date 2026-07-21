@@ -23,7 +23,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class StatusCommand extends Command
 {
-    const string ARG_INCREMENT_ID = 'increment_id';
+    const ARG_INCREMENT_ID = 'increment_id';
 
     /**
      * @param RMARepositoryInterface $rmaRepository

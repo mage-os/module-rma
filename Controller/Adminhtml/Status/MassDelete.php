@@ -12,7 +12,7 @@ use Magento\Ui\Component\MassAction\Filter;
 
 class MassDelete extends AbstractLookupMassDelete
 {
-    const string ADMIN_RESOURCE = 'MageOS_RMA::rma_status';
+    const ADMIN_RESOURCE = 'MageOS_RMA::rma_status';
 
     /**
      * @param Context $context

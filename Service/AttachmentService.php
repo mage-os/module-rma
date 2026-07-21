@@ -24,10 +24,10 @@ use Magento\Framework\Exception\NoSuchEntityException;
 
 class AttachmentService
 {
-    const string BASE_TMP_PATH = 'rma/tmp';
-    const string BASE_PATH = 'rma/attachments';
-    const int BYTES_PER_KB = 1024;
-    const int BYTES_PER_MB = 1024 * 1024;
+    const BASE_TMP_PATH = 'rma/tmp';
+    const BASE_PATH = 'rma/attachments';
+    const BYTES_PER_KB = 1024;
+    const BYTES_PER_MB = 1024 * 1024;
 
     protected WriteInterface $varDirectory;
 

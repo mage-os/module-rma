@@ -6,7 +6,7 @@ namespace MageOS\RMA\Controller\Adminhtml;
 
 abstract class ResolutionType extends AbstractLookupController
 {
-    const string ADMIN_RESOURCE = 'MageOS_RMA::rma_resolution_type';
+    const ADMIN_RESOURCE = 'MageOS_RMA::rma_resolution_type';
 
     /**
      * @return string

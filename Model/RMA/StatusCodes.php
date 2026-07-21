@@ -6,15 +6,15 @@ namespace MageOS\RMA\Model\RMA;
 
 class StatusCodes
 {
-    const string NEW_REQUEST = 'new_request';
-    const string NEED_DETAILS = 'need_details';
-    const string APPROVED = 'approved';
-    const string REJECTED = 'rejected';
-    const string SHIPPED_BY_CUSTOMER = 'shipped_by_customer';
-    const string RECEIVED_BY_ADMIN = 'received_by_admin';
-    const string CANCELED_BY_CUSTOMER = 'canceled_by_customer';
-    const string RESOLVED = 'resolved';
-    const array STATUS_EVENT_MAP = [
+    const NEW_REQUEST = 'new_request';
+    const NEED_DETAILS = 'need_details';
+    const APPROVED = 'approved';
+    const REJECTED = 'rejected';
+    const SHIPPED_BY_CUSTOMER = 'shipped_by_customer';
+    const RECEIVED_BY_ADMIN = 'received_by_admin';
+    const CANCELED_BY_CUSTOMER = 'canceled_by_customer';
+    const RESOLVED = 'resolved';
+    const STATUS_EVENT_MAP = [
         self::APPROVED => 'rma_approved_after',
         self::REJECTED => 'rma_rejected_after',
         self::SHIPPED_BY_CUSTOMER => 'rma_shipped_by_customer_after',
@@ -23,7 +23,7 @@ class StatusCodes
         self::RESOLVED => 'rma_resolved_after',
     ];
 
-    const array PROTECTED_CODES = [
+    const PROTECTED_CODES = [
         self::NEW_REQUEST,
         self::APPROVED,
         self::REJECTED,

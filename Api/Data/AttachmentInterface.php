@@ -9,14 +9,14 @@ namespace MageOS\RMA\Api\Data;
  */
 interface AttachmentInterface
 {
-    const string ENTITY_ID = 'entity_id';
-    const string RMA_ID = 'rma_id';
-    const string COMMENT_ID = 'comment_id';
-    const string FILE_NAME = 'file_name';
-    const string FILE_PATH = 'file_path';
-    const string FILE_SIZE = 'file_size';
-    const string MIME_TYPE = 'mime_type';
-    const string CREATED_AT = 'created_at';
+    const ENTITY_ID = 'entity_id';
+    const RMA_ID = 'rma_id';
+    const COMMENT_ID = 'comment_id';
+    const FILE_NAME = 'file_name';
+    const FILE_PATH = 'file_path';
+    const FILE_SIZE = 'file_size';
+    const MIME_TYPE = 'mime_type';
+    const CREATED_AT = 'created_at';
 
     /**
      * @return int|null

@@ -6,7 +6,7 @@ namespace MageOS\RMA\Controller\Adminhtml;
 
 abstract class Status extends AbstractLookupController
 {
-    const string ADMIN_RESOURCE = 'MageOS_RMA::rma_status';
+    const ADMIN_RESOURCE = 'MageOS_RMA::rma_status';
 
     /**
      * @return string

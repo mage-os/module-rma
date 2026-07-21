@@ -16,7 +16,7 @@ use Magento\Framework\Exception\NoSuchEntityException;
 
 class Items extends Action implements HttpGetActionInterface
 {
-    const string ADMIN_RESOURCE = 'MageOS_RMA::rma_manage';
+    const ADMIN_RESOURCE = 'MageOS_RMA::rma_manage';
 
     /**
      * @param Context $context

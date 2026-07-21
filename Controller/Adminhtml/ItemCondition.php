@@ -6,7 +6,7 @@ namespace MageOS\RMA\Controller\Adminhtml;
 
 abstract class ItemCondition extends AbstractLookupController
 {
-    const string ADMIN_RESOURCE = 'MageOS_RMA::rma_item_condition';
+    const ADMIN_RESOURCE = 'MageOS_RMA::rma_item_condition';
 
     /**
      * @return string
