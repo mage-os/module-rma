@@ -12,7 +12,7 @@ use Magento\Framework\Api\SearchResultsInterface;
 interface StatusSearchResultsInterface extends SearchResultsInterface
 {
     /**
-     * @return StatusInterface[]
+     * @return \MageOS\RMA\Api\Data\StatusInterface[]
      */
     public function getItems(): array;
 

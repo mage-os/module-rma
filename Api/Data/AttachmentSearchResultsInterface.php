@@ -12,7 +12,7 @@ use Magento\Framework\Api\SearchResultsInterface;
 interface AttachmentSearchResultsInterface extends SearchResultsInterface
 {
     /**
-     * @return AttachmentInterface[]
+     * @return \MageOS\RMA\Api\Data\AttachmentInterface[]
      */
     public function getItems(): array;
 

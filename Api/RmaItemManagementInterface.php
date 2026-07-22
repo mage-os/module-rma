@@ -20,7 +20,7 @@ interface RmaItemManagementInterface
     /**
      * @param int $rmaId
      * @param SearchCriteriaInterface $searchCriteria
-     * @return ItemSearchResultsInterface
+     * @return \MageOS\RMA\Api\Data\ItemSearchResultsInterface
      * @throws NoSuchEntityException
      */
     public function getList(int $rmaId, SearchCriteriaInterface $searchCriteria): ItemSearchResultsInterface;
@@ -28,7 +28,7 @@ interface RmaItemManagementInterface
     /**
      * @param int $rmaId
      * @param ItemInterface $item
-     * @return ItemInterface
+     * @return \MageOS\RMA\Api\Data\ItemInterface
      * @throws NoSuchEntityException
      * @throws CouldNotSaveException
      * @throws LocalizedException

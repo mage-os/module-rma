@@ -18,21 +18,21 @@ interface RMARepositoryInterface
 {
     /**
      * @param int $entityId
-     * @return RMAInterface
+     * @return \MageOS\RMA\Api\Data\RMAInterface
      * @throws NoSuchEntityException
      */
     public function get(int $entityId): RMAInterface;
 
     /**
      * @param string $incrementId
-     * @return RMAInterface
+     * @return \MageOS\RMA\Api\Data\RMAInterface
      * @throws NoSuchEntityException
      */
     public function getByIncrementId(string $incrementId): RMAInterface;
 
     /**
      * @param RMAInterface $rma
-     * @return RMAInterface
+     * @return \MageOS\RMA\Api\Data\RMAInterface
      * @throws CouldNotSaveException
      */
     public function save(RMAInterface $rma): RMAInterface;
@@ -54,7 +54,7 @@ interface RMARepositoryInterface
 
     /**
      * @param SearchCriteriaInterface $searchCriteria
-     * @return RMASearchResultsInterface
+     * @return \MageOS\RMA\Api\Data\RMASearchResultsInterface
      */
     public function getList(SearchCriteriaInterface $searchCriteria): RMASearchResultsInterface;
 }

@@ -12,7 +12,7 @@ use Magento\Framework\Api\SearchResultsInterface;
 interface CommentSearchResultsInterface extends SearchResultsInterface
 {
     /**
-     * @return CommentInterface[]
+     * @return \MageOS\RMA\Api\Data\CommentInterface[]
      */
     public function getItems(): array;
 

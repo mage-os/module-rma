@@ -18,14 +18,14 @@ interface StatusRepositoryInterface
 {
     /**
      * @param int $entityId
-     * @return StatusInterface
+     * @return \MageOS\RMA\Api\Data\StatusInterface
      * @throws NoSuchEntityException
      */
     public function get(int $entityId): StatusInterface;
 
     /**
      * @param StatusInterface $status
-     * @return StatusInterface
+     * @return \MageOS\RMA\Api\Data\StatusInterface
      * @throws CouldNotSaveException
      */
     public function save(StatusInterface $status): StatusInterface;
@@ -47,7 +47,7 @@ interface StatusRepositoryInterface
 
     /**
      * @param SearchCriteriaInterface $searchCriteria
-     * @return StatusSearchResultsInterface
+     * @return \MageOS\RMA\Api\Data\StatusSearchResultsInterface
      */
     public function getList(SearchCriteriaInterface $searchCriteria): StatusSearchResultsInterface;
 }

@@ -18,14 +18,14 @@ interface AttachmentRepositoryInterface
 {
     /**
      * @param int $entityId
-     * @return AttachmentInterface
+     * @return \MageOS\RMA\Api\Data\AttachmentInterface
      * @throws NoSuchEntityException
      */
     public function get(int $entityId): AttachmentInterface;
 
     /**
      * @param AttachmentInterface $attachment
-     * @return AttachmentInterface
+     * @return \MageOS\RMA\Api\Data\AttachmentInterface
      * @throws CouldNotSaveException
      */
     public function save(AttachmentInterface $attachment): AttachmentInterface;
@@ -47,7 +47,7 @@ interface AttachmentRepositoryInterface
 
     /**
      * @param SearchCriteriaInterface $searchCriteria
-     * @return AttachmentSearchResultsInterface
+     * @return \MageOS\RMA\Api\Data\AttachmentSearchResultsInterface
      */
     public function getList(SearchCriteriaInterface $searchCriteria): AttachmentSearchResultsInterface;
 }

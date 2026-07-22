@@ -18,14 +18,14 @@ interface ReasonRepositoryInterface
 {
     /**
      * @param int $entityId
-     * @return ReasonInterface
+     * @return \MageOS\RMA\Api\Data\ReasonInterface
      * @throws NoSuchEntityException
      */
     public function get(int $entityId): ReasonInterface;
 
     /**
      * @param ReasonInterface $reason
-     * @return ReasonInterface
+     * @return \MageOS\RMA\Api\Data\ReasonInterface
      * @throws CouldNotSaveException
      */
     public function save(ReasonInterface $reason): ReasonInterface;
@@ -47,7 +47,7 @@ interface ReasonRepositoryInterface
 
     /**
      * @param SearchCriteriaInterface $searchCriteria
-     * @return ReasonSearchResultsInterface
+     * @return \MageOS\RMA\Api\Data\ReasonSearchResultsInterface
      */
     public function getList(SearchCriteriaInterface $searchCriteria): ReasonSearchResultsInterface;
 }

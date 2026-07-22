@@ -18,14 +18,14 @@ interface CommentRepositoryInterface
 {
     /**
      * @param int $entityId
-     * @return CommentInterface
+     * @return \MageOS\RMA\Api\Data\CommentInterface
      * @throws NoSuchEntityException
      */
     public function get(int $entityId): CommentInterface;
 
     /**
      * @param CommentInterface $comment
-     * @return CommentInterface
+     * @return \MageOS\RMA\Api\Data\CommentInterface
      * @throws CouldNotSaveException
      */
     public function save(CommentInterface $comment): CommentInterface;
@@ -47,7 +47,7 @@ interface CommentRepositoryInterface
 
     /**
      * @param SearchCriteriaInterface $searchCriteria
-     * @return CommentSearchResultsInterface
+     * @return \MageOS\RMA\Api\Data\CommentSearchResultsInterface
      */
     public function getList(SearchCriteriaInterface $searchCriteria): CommentSearchResultsInterface;
 }

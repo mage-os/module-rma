@@ -18,14 +18,14 @@ interface ItemConditionRepositoryInterface
 {
     /**
      * @param int $entityId
-     * @return ItemConditionInterface
+     * @return \MageOS\RMA\Api\Data\ItemConditionInterface
      * @throws NoSuchEntityException
      */
     public function get(int $entityId): ItemConditionInterface;
 
     /**
      * @param ItemConditionInterface $itemCondition
-     * @return ItemConditionInterface
+     * @return \MageOS\RMA\Api\Data\ItemConditionInterface
      * @throws CouldNotSaveException
      */
     public function save(ItemConditionInterface $itemCondition): ItemConditionInterface;
@@ -47,7 +47,7 @@ interface ItemConditionRepositoryInterface
 
     /**
      * @param SearchCriteriaInterface $searchCriteria
-     * @return ItemConditionSearchResultsInterface
+     * @return \MageOS\RMA\Api\Data\ItemConditionSearchResultsInterface
      */
     public function getList(SearchCriteriaInterface $searchCriteria): ItemConditionSearchResultsInterface;
 }

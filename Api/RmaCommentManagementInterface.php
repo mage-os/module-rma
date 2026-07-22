@@ -19,7 +19,7 @@ interface RmaCommentManagementInterface
     /**
      * @param int $rmaId
      * @param SearchCriteriaInterface $searchCriteria
-     * @return CommentSearchResultsInterface
+     * @return \MageOS\RMA\Api\Data\CommentSearchResultsInterface
      * @throws NoSuchEntityException
      */
     public function getList(int $rmaId, SearchCriteriaInterface $searchCriteria): CommentSearchResultsInterface;
@@ -27,7 +27,7 @@ interface RmaCommentManagementInterface
     /**
      * @param int $rmaId
      * @param CommentInterface $comment
-     * @return CommentInterface
+     * @return \MageOS\RMA\Api\Data\CommentInterface
      * @throws NoSuchEntityException
      * @throws CouldNotSaveException
      * @throws LocalizedException

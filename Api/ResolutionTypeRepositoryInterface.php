@@ -18,14 +18,14 @@ interface ResolutionTypeRepositoryInterface
 {
     /**
      * @param int $entityId
-     * @return ResolutionTypeInterface
+     * @return \MageOS\RMA\Api\Data\ResolutionTypeInterface
      * @throws NoSuchEntityException
      */
     public function get(int $entityId): ResolutionTypeInterface;
 
     /**
      * @param ResolutionTypeInterface $resolutionType
-     * @return ResolutionTypeInterface
+     * @return \MageOS\RMA\Api\Data\ResolutionTypeInterface
      * @throws CouldNotSaveException
      */
     public function save(ResolutionTypeInterface $resolutionType): ResolutionTypeInterface;
@@ -47,7 +47,7 @@ interface ResolutionTypeRepositoryInterface
 
     /**
      * @param SearchCriteriaInterface $searchCriteria
-     * @return ResolutionTypeSearchResultsInterface
+     * @return \MageOS\RMA\Api\Data\ResolutionTypeSearchResultsInterface
      */
     public function getList(SearchCriteriaInterface $searchCriteria): ResolutionTypeSearchResultsInterface;
 }
