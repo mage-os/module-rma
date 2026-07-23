@@ -12,12 +12,12 @@ use Magento\Framework\Api\SearchResultsInterface;
 interface ItemSearchResultsInterface extends SearchResultsInterface
 {
     /**
-     * @return ItemInterface[]
+     * @return \MageOS\RMA\Api\Data\ItemInterface[]
      */
     public function getItems(): array;
 
     /**
-     * @param ItemInterface[] $items
+     * @param \MageOS\RMA\Api\Data\ItemInterface[] $items
      * @return $this
      */
     public function setItems(array $items): self;

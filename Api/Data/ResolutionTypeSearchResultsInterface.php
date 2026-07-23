@@ -12,12 +12,12 @@ use Magento\Framework\Api\SearchResultsInterface;
 interface ResolutionTypeSearchResultsInterface extends SearchResultsInterface
 {
     /**
-     * @return ResolutionTypeInterface[]
+     * @return \MageOS\RMA\Api\Data\ResolutionTypeInterface[]
      */
     public function getItems(): array;
 
     /**
-     * @param ResolutionTypeInterface[] $items
+     * @param \MageOS\RMA\Api\Data\ResolutionTypeInterface[] $items
      * @return $this
      */
     public function setItems(array $items): self;

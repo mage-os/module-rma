@@ -12,12 +12,12 @@ use Magento\Framework\Api\SearchResultsInterface;
 interface ReasonSearchResultsInterface extends SearchResultsInterface
 {
     /**
-     * @return ReasonInterface[]
+     * @return \MageOS\RMA\Api\Data\ReasonInterface[]
      */
     public function getItems(): array;
 
     /**
-     * @param ReasonInterface[] $items
+     * @param \MageOS\RMA\Api\Data\ReasonInterface[] $items
      * @return $this
      */
     public function setItems(array $items): self;

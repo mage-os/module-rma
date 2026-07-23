@@ -12,12 +12,12 @@ use Magento\Framework\Api\SearchResultsInterface;
 interface ItemConditionSearchResultsInterface extends SearchResultsInterface
 {
     /**
-     * @return ItemConditionInterface[]
+     * @return \MageOS\RMA\Api\Data\ItemConditionInterface[]
      */
     public function getItems(): array;
 
     /**
-     * @param ItemConditionInterface[] $items
+     * @param \MageOS\RMA\Api\Data\ItemConditionInterface[] $items
      * @return $this
      */
     public function setItems(array $items): self;
