@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.4.1] - 2026-07-23
+
+### Fixed
+- Support PHP 8.2 and declare an open Magento compatibility range by @marcelmtz in #47
+- Use full qalified class names in API interfaces result types by @stollr in #49 and @Hawksama in #50
+
 ## [2.4.0] - 2026-07-05
 
 ### Added
