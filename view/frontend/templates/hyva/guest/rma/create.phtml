@@ -101,15 +101,24 @@ $resolutionTypes = $block->getResolutionTypes();
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     <template x-for="item in orderItems" :key="item.order_item_id">
-                                        <tr class="hover:bg-gray-50 transition-colors">
+                                        <tr class="transition-colors"
+                                            :class="item.is_eligible ? 'hover:bg-gray-50' : 'opacity-50 cursor-not-allowed'"
+                                            :title="item.is_eligible ? '' : item.disabled_reason">
                                             <td class="px-4 py-3">
                                                 <input type="checkbox"
                                                        :name="'items[' + item.order_item_id + '][selected]'"
                                                        value="1"
                                                        x-model="item.selected"
-                                                       class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"/>
+                                                       :disabled="!item.is_eligible"
+                                                       :title="item.is_eligible ? '' : item.disabled_reason"
+                                                       class="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary disabled:cursor-not-allowed"/>
                                             </td>
-                                            <td class="px-4 py-3 text-sm text-gray-900" x-text="item.name"></td>
+                                            <td class="px-4 py-3 text-sm text-gray-900">
+                                                <span x-text="item.name"></span>
+                                                <template x-if="!item.is_eligible">
+                                                    <p class="text-xs text-gray-500 mt-1" x-text="item.disabled_reason"></p>
+                                                </template>
+                                            </td>
                                             <td class="px-4 py-3 text-sm text-gray-500 font-mono" x-text="item.sku"></td>
                                             <td class="px-4 py-3">
                                                 <input type="number"
@@ -118,7 +127,7 @@ $resolutionTypes = $block->getResolutionTypes();
                                                        x-model.number="item.qty_requested"
                                                        min="1"
                                                        :max="item.qty_available"
-                                                       :disabled="!item.selected"
+                                                       :disabled="!item.selected || !item.is_eligible"
                                                        class="w-20 border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none disabled:bg-gray-100 disabled:text-gray-400"/>
                                                 <span class="text-xs text-gray-400 ml-1"
                                                       x-text="'(max: ' + item.qty_available + ')'"></span>
@@ -126,7 +135,7 @@ $resolutionTypes = $block->getResolutionTypes();
                                             <td class="px-4 py-3">
                                                 <select :name="'items[' + item.order_item_id + '][condition_id]'"
                                                         x-model="item.condition_id"
-                                                        :disabled="!item.selected"
+                                                        :disabled="!item.selected || !item.is_eligible"
                                                         class="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none disabled:bg-gray-100 disabled:text-gray-400">
                                                     <option value=""><?= $escaper->escapeHtml(__('-- Select --')) ?></option>
                                                     <template x-for="cond in conditions" :key="cond.value">
@@ -251,7 +260,7 @@ $resolutionTypes = $block->getResolutionTypes();
             },
 
             submitForm(event) {
-                const hasSelected = this.orderItems.some(item => item.selected);
+                const hasSelected = this.orderItems.some(item => item.selected && item.is_eligible);
                 if (!hasSelected) {
                     alert('<?= $escaper->escapeJs(__('Please select at least one item to return.')) ?>');
                     return;

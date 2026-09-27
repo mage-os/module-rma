@@ -5,7 +5,7 @@
 "Increment ID Prefix","Préfixe ID Incrémental"
 "Prefix for the RMA increment ID (e.g. RMA-).","Préfixe pour l'ID incrémental RMA (ex. RMA-)."
 "Return Period (Days)","Période de Retour (Jours)"
-"Number of days after order completion within which a return can be requested.","Nombre de jours après la finalisation de la commande pendant lesquels un retour peut être demandé."
+"Number of days within which a return can be requested. For unshipped items there is no limit; for shipped items the count starts from the shipment date. By law, the return period starts from the date the customer receives the goods, but Magento cannot know the delivery date: set this value adding the expected delivery time to the legal return period (e.g. 14 days + 3 days delivery = 17). 0 = no limit.","Nombre de jours pendant lesquels un retour peut être demandé. Pour les articles non expédiés, il n'y a aucune limite ; pour les articles expédiés, le décompte commence à la date d'expédition. Selon la loi, le délai de retour court à partir de la date à laquelle le client reçoit la marchandise, mais Magento ne peut pas connaître la date de livraison : définissez cette valeur en ajoutant le délai de livraison prévu au délai de retour légal (ex. 14 jours + 3 jours de livraison = 17). 0 = aucune limite."
 "Policy","Politique"
 "Auto-Approve Returns","Approbation Automatique des Retours"
 "If enabled, new RMA requests will be automatically approved.","Si activé, les nouvelles demandes RMA seront automatiquement approuvées."
@@ -230,3 +230,4 @@
 "Damaged","Endommagé"
 "Opened","Ouvert"
 "Unopened","Non ouvert"
+"Return period expired on %1","Délai de retour expiré le %1"

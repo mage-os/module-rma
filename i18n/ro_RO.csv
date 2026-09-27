@@ -5,7 +5,7 @@
 "Increment ID Prefix","Prefix ID Incremental"
 "Prefix for the RMA increment ID (e.g. RMA-).","Prefix pentru ID-ul incremental RMA (ex. RMA-)."
 "Return Period (Days)","Perioadă Retur (Zile)"
-"Number of days after order completion within which a return can be requested.","Numărul de zile după finalizarea comenzii în care poate fi solicitată o returnare."
+"Number of days within which a return can be requested. For unshipped items there is no limit; for shipped items the count starts from the shipment date. By law, the return period starts from the date the customer receives the goods, but Magento cannot know the delivery date: set this value adding the expected delivery time to the legal return period (e.g. 14 days + 3 days delivery = 17). 0 = no limit.","Numărul de zile în care poate fi solicitată o returnare. Pentru produsele neexpediate nu există nicio limită; pentru produsele expediate numărătoarea începe de la data expedierii. Conform legii, perioada de returnare începe de la data la care clientul primește marfa, dar Magento nu poate cunoaște data livrării: setați această valoare adăugând timpul de livrare estimat la perioada legală de returnare (ex. 14 zile + 3 zile de livrare = 17). 0 = fără limită."
 "Policy","Politică"
 "Auto-Approve Returns","Aprobare Automată Retururi"
 "If enabled, new RMA requests will be automatically approved.","Dacă este activat, cererile noi de RMA vor fi aprobate automat."
@@ -230,3 +230,4 @@
 "Damaged","Deteriorat"
 "Opened","Deschis"
 "Unopened","Nedeschis"
+"Return period expired on %1","Perioada de returnare a expirat pe %1"
