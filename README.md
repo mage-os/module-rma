@@ -30,7 +30,7 @@ Module settings are located at **Stores > Configuration > Sales > RMA - Return M
 |---|---|---|---|
 | Enable RMA | Yes/No | No | Enable or disable the RMA feature (scope: website) |
 | Increment ID Prefix | Text | `RMA-` | Prefix for the return increment ID (e.g. `RMA-000001`) |
-| Return Period (Days) | Numeric | `30` | Number of days after order placement within which a return can be requested |
+| Return Period (Days) | Numeric | `30` | Number of days within which a return can be requested. Unshipped items have no limit; for shipped items the count starts from the shipment date. By law the period starts when the customer receives the goods, which Magento cannot know: set this value adding the expected delivery time to the legal period (e.g. 14 + 3 = 17). `0` = no limit |
 
 ### Policy
 
@@ -105,9 +105,9 @@ The RMA edit page includes a **Comments** section that enables communication bet
 
 ## Frontend — Customer
 
-### My Returns
+### Withdrawals and Returns
 
-A **My Returns** link appears in the customer account sidebar. The page shows all of the customer's returns sorted by date descending, with pagination.
+A **Withdrawals and Returns** link appears in the customer account sidebar. The page shows all of the customer's returns sorted by date descending, with pagination.
 
 Table columns:
 
@@ -119,7 +119,7 @@ Table columns:
 | Created At | Creation date |
 | Action | **View** link to the detail page |
 
-The **Request Return** button at the top leads to the creation form.
+The **Withdraw from purchase** button at the top leads to the creation form.
 
 ### RMA Detail
 
@@ -143,30 +143,30 @@ Below the detail section there is a comments area that allows the customer to co
 
 ### Creating an RMA from the customer area
 
-1. From **My Returns**, click **Request Return**
+1. From **Withdrawals and Returns**, click **Withdraw from purchase**
 2. Select an order from the dropdown (only eligible orders are shown — see Eligibility section)
 3. On order change, available items are loaded via AJAX
-4. For each item: check the checkbox, specify quantity and condition
+4. For each item: check the checkbox, specify quantity and condition. Items whose return period has expired are shown greyed out and cannot be selected, with the reason ("Return period expired on …") shown below the product name and as a tooltip
 5. Select reason and preferred resolution
 6. Optionally attach files via drag & drop or file picker (allowed extensions and size limits are configurable — see Attachments configuration)
-7. Click **Submit Return Request**
+7. Click **Confirm**
 
-If arriving from the **Request Return** button on the order detail page, the order is pre-selected and the dropdown is disabled.
+If arriving from the **Withdraw from purchase** button on the order detail page, the order is pre-selected and the dropdown is disabled.
 
-### "Request Return" button on order detail
+### "Withdraw from purchase" button on order detail
 
-On the customer order detail page (**Sales > My Orders > View Order**), a **Request Return** button appears in the action bar if the order is eligible for a return. Clicking it leads to the creation form with the order pre-selected.
+On the customer order detail page (**Sales > My Orders > View Order**), a **Withdraw from purchase** button (tooltip: "Cancel the order or return the items") appears in the action bar if the order is eligible for a return. Clicking it leads to the creation form with the order pre-selected.
 
 ## Frontend — Guest
 
 Guests (orders without an account) can request a return from the guest order detail page:
 
 1. Access the guest order detail via **Orders and Returns** (order number + email/ZIP)
-2. If the order is eligible, the **Request Return** button appears
+2. If the order is eligible, the **Withdraw from purchase** button appears
 3. The form is identical to the logged-in customer form, but without the order dropdown (the order is already determined)
 4. After submission, the return is created with `customer_id = null`
 
-> Guests do not have a "My Returns" section — they can only create returns from the order detail page.
+> Guests do not have a "Withdrawals and Returns" section — they can only create returns from the order detail page.
 
 ## Order Eligibility for RMA
 
@@ -174,16 +174,29 @@ An order is eligible for a return request if **all** of these conditions are met
 
 1. **RMA enabled** — the module is enabled for the order's website (`isEnabled()`)
 2. **Allowed status** — the order status is among those configured in "Allowed Order Statuses"
-3. **Return period** — the order date is within the period configured in "Return Period (Days)". If the period is `0`, returns are always allowed (no time limit)
-4. **Available items** — the order has at least one item with remaining returnable quantity (qty ordered − qty already requested in other RMAs > 0). Virtual items, downloadable items, and parent items of configurable/bundle products are excluded
+3. **Available items** — the order has at least one item with remaining returnable quantity (qty ordered − qty already requested in other RMAs > 0) that is still within the return period (see below). Virtual items, downloadable items, and child items of configurable/bundle products are excluded (the parent item is the returnable line)
+
+### Return period
+
+The return period ("Return Period (Days)") is evaluated **per item quantity, starting from the shipment date**:
+
+- **Unshipped quantity** is always returnable (no time limit)
+- **Shipped quantity** is returnable only if its shipment was created within the configured number of days
+- If the period is `0`, returns are always allowed (no time limit)
+
+The returnable quantity of an item is `min(qty ordered − qty already requested, qty ordered − qty shipped before the cutoff)`. Example with a 30-day period: 3 units ordered, 2 shipped 40 days ago and 1 shipped 5 days ago → 1 unit returnable.
+
+For bundle products shipped separately, child shipments are converted to parent units: a parent unit counts as expired only when all its components have expired.
+
+Items whose returnable quantity is `0` because of the return period are still returned by `getEligibleItems()` with `is_eligible = false` and a localized `disabled_reason`; the customer, guest and admin creation forms show them greyed out and not selectable. Items that are virtual, downloadable or already fully requested are not returned at all. The same quantity check is enforced server side when the RMA is submitted (frontend, admin and GraphQL).
 
 The logic is centralized in the `Service\OrderEligibility` service with the following methods:
 
 | Method | Description |
 |---|---|
-| `isOrderEligible(OrderInterface $order): bool` | Checks all 4 conditions |
-| `getEligibleItems(OrderInterface $order): array` | Returns items with available quantity |
-| `getCustomerEligibleOrders(int $customerId, int $storeId): Collection` | Customer orders matching conditions 1-3 |
+| `isOrderEligible(OrderInterface $order): bool` | Checks all 3 conditions |
+| `getEligibleItems(OrderInterface $order): array` | Returns items with remaining quantity, each with `qty_available`, `is_eligible` and `disabled_reason` |
+| `getCustomerEligibleOrders(int $customerId, int $storeId): Collection` | Customer orders with an allowed status that have unshipped items or a shipment within the return period |
 
 ## Repositories and Service Contracts
 
@@ -568,13 +581,13 @@ The module ships `hyva_` prefixed layout XML files alongside the standard Luma l
 
 | Luma layout | Hyvä layout | Purpose |
 |---|---|---|
-| `customer_account.xml` | `hyva_customer_account.xml` | "My Returns" sidebar link |
+| `customer_account.xml` | `hyva_customer_account.xml` | "Withdrawals and Returns" sidebar link |
 | `rma_customer_history.xml` | `hyva_rma_customer_history.xml` | Returns list page |
 | `rma_customer_view.xml` | `hyva_rma_customer_view.xml` | Return detail + comments |
 | `rma_customer_create.xml` | `hyva_rma_customer_create.xml` | Create return form |
 | `rma_guest_create.xml` | `hyva_rma_guest_create.xml` | Guest return form |
-| `sales_order_view.xml` | `hyva_sales_order_view.xml` | "Request Return" button (customer) |
-| `sales_guest_view.xml` | `hyva_sales_guest_view.xml` | "Request Return" button (guest) |
+| `sales_order_view.xml` | `hyva_sales_order_view.xml` | "Withdraw from purchase" button (customer) |
+| `sales_guest_view.xml` | `hyva_sales_guest_view.xml` | "Withdraw from purchase" button (guest) |
 
 ### Templates
 
