@@ -63,7 +63,7 @@ class Create implements HttpGetActionInterface
         $this->request->setParam('current_order', $order);
 
         $resultPage = $this->resultPageFactory->create();
-        $resultPage->getConfig()->getTitle()->set(__('Request Return'));
+        $resultPage->getConfig()->getTitle()->set(__('Withdraw from purchase'));
 
         return $resultPage;
     }

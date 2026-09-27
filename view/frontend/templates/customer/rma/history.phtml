@@ -9,15 +9,16 @@ $rmaCollection = $block->getRmaCollection();
 ?>
 <div class="block block-rma-history">
     <div class="block-title">
-        <a href="<?= $escaper->escapeUrl($block->getCreateUrl()) ?>" class="action create primary">
-            <span><?= $escaper->escapeHtml(__('Request Return')) ?></span>
+        <a href="<?= $escaper->escapeUrl($block->getCreateUrl()) ?>" class="action create primary"
+           title="<?= $escaper->escapeHtmlAttr(__('Cancel the order or return the items')) ?>">
+            <span><?= $escaper->escapeHtml(__('Withdraw from purchase')) ?></span>
         </a>
     </div>
     <div class="block-content">
         <?php if ($rmaCollection && $rmaCollection->getSize()): ?>
             <div class="table-wrapper rma-history">
                 <table class="data table table-rma-history" id="rma-history-table">
-                    <caption class="table-caption"><?= $escaper->escapeHtml(__('My Returns')) ?></caption>
+                    <caption class="table-caption"><?= $escaper->escapeHtml(__('Withdrawals and Returns')) ?></caption>
                     <thead>
                         <tr>
                             <th scope="col" class="col id"><?= $escaper->escapeHtml(__('RMA #')) ?></th>

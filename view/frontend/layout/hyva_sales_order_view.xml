@@ -5,7 +5,7 @@
         <referenceBlock name="sales.order.buttons">
             <block class="MageOS\RMA\Block\Sales\Order\ReturnLink" name="rma.order.return.link.hyva">
                 <arguments>
-                    <argument name="label" xsi:type="string" translate="true">Request Return</argument>
+                    <argument name="label" xsi:type="string" translate="true">Withdraw from purchase</argument>
                     <argument name="classes" xsi:type="string" translate="true">btn btn-secondary</argument>
                 </arguments>
             </block>

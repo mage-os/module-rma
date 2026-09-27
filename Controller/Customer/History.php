@@ -34,7 +34,7 @@ class History implements HttpGetActionInterface
         }
 
         $resultPage = $this->resultPageFactory->create();
-        $resultPage->getConfig()->getTitle()->set(__('My Returns'));
+        $resultPage->getConfig()->getTitle()->set(__('Withdrawals and Returns'));
 
         return $resultPage;
     }

@@ -5,7 +5,7 @@
             <block class="MageOS\RMA\Block\Customer\Account\RmaLink" name="customer-account-navigation-rma-link">
                 <arguments>
                     <argument name="path" xsi:type="string">rma/customer/history</argument>
-                    <argument name="label" xsi:type="string" translate="true">My Returns</argument>
+                    <argument name="label" xsi:type="string" translate="true">Withdrawals and Returns</argument>
                     <argument name="sortOrder" xsi:type="number">100</argument>
                 </arguments>
             </block>

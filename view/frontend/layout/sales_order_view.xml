@@ -4,7 +4,7 @@
         <referenceBlock name="sales.order.info.buttons">
             <block class="MageOS\RMA\Block\Sales\Order\ReturnLink" name="rma.order.return.link">
                 <arguments>
-                    <argument name="label" xsi:type="string" translate="true">Request Return</argument>
+                    <argument name="label" xsi:type="string" translate="true">Withdraw from purchase</argument>
                     <argument name="classes" xsi:type="string" translate="true">action return</argument>
                 </arguments>
             </block>

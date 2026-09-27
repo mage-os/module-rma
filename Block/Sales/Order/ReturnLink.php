@@ -71,10 +71,11 @@ class ReturnLink extends Link
 
 
         return sprintf(
-            '<a href="%s" class="%s">%s</a>',
+            '<a href="%s" class="%s" title="%s">%s</a>',
             $this->escapeUrl($this->getHref()),
             $this->getData('classes'),
-            $this->escapeHtml($this->getData('label') ?: __('Request Return'))
+            $this->escapeHtmlAttr(__('Cancel the order or return the items')),
+            $this->escapeHtml($this->getData('label') ?: __('Withdraw from purchase'))
         );
     }
 }
