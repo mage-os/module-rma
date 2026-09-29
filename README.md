@@ -149,7 +149,7 @@ Below the detail section there is a comments area that allows the customer to co
 4. For each item: check the checkbox, specify quantity and condition. Items whose return period has expired are shown greyed out and cannot be selected, with the reason ("Return period expired on …") shown below the product name and as a tooltip
 5. Select reason and preferred resolution
 6. Optionally attach files via drag & drop or file picker (allowed extensions and size limits are configurable — see Attachments configuration)
-7. Click **Confirm**
+7. Click **Confirm withdrawal**
 
 If arriving from the **Withdraw from purchase** button on the order detail page, the order is pre-selected and the dropdown is disabled.
 
@@ -174,7 +174,7 @@ An order is eligible for a return request if **all** of these conditions are met
 
 1. **RMA enabled** — the module is enabled for the order's website (`isEnabled()`)
 2. **Allowed status** — the order status is among those configured in "Allowed Order Statuses"
-3. **Available items** — the order has at least one item with remaining returnable quantity (qty ordered − qty already requested in other RMAs > 0) that is still within the return period (see below). Virtual items, downloadable items, and child items of configurable/bundle products are excluded (the parent item is the returnable line)
+3. **Available items** — the order has at least one item with remaining returnable quantity (qty ordered − qty canceled − qty already requested in other RMAs > 0) that is still within the return period (see below). Virtual items, downloadable items, and child items of configurable/bundle products are excluded (the parent item is the returnable line)
 
 ### Return period
 
@@ -184,7 +184,13 @@ The return period ("Return Period (Days)") is evaluated **per item quantity, sta
 - **Shipped quantity** is returnable only if its shipment was created within the configured number of days
 - If the period is `0`, returns are always allowed (no time limit)
 
-The returnable quantity of an item is `min(qty ordered − qty already requested, qty ordered − qty shipped before the cutoff)`. Example with a 30-day period: 3 units ordered, 2 shipped 40 days ago and 1 shipped 5 days ago → 1 unit returnable.
+Cancelled quantities are never returnable, and units refunded before shipment do not count as unshipped. The returnable quantity of an item is:
+
+- total: `qty ordered − qty canceled − qty already requested`
+- within the period: `unshipped + (qty shipped − qty shipped before the cutoff)`, where `unshipped = qty ordered − qty canceled − qty refunded − qty shipped` (the same as Magento's quantity to ship)
+- returnable: `min(total, within the period)`
+
+Example with a 30-day period: 3 units ordered, 2 shipped 40 days ago and 1 shipped 5 days ago → 1 unit returnable. Example: 2 units ordered, 1 shipped, 1 cancelled → only the shipped unit is returnable, while within the period.
 
 For bundle products shipped separately, child shipments are converted to parent units: a parent unit counts as expired only when all its components have expired.
 
