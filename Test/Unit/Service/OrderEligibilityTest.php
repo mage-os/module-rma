@@ -202,7 +202,10 @@ class OrderEligibilityTest extends TestCase
         int $itemId,
         int $qtyOrdered,
         string $name = 'Product',
-        string $sku = 'SKU-001'
+        string $sku = 'SKU-001',
+        int $qtyShipped = 0,
+        int $qtyCanceled = 0,
+        int $qtyRefunded = 0
     ): OrderItemInterface&MockObject {
         $item = $this->createMock(OrderItemInterface::class);
         $item->method('getParentItemId')->willReturn($parentItemId);
@@ -211,12 +214,19 @@ class OrderEligibilityTest extends TestCase
         $item->method('getQtyOrdered')->willReturn($qtyOrdered);
         $item->method('getName')->willReturn($name);
         $item->method('getSku')->willReturn($sku);
+        $item->method('getQtyShipped')->willReturn($qtyShipped);
+        $item->method('getQtyCanceled')->willReturn($qtyCanceled);
+        $item->method('getQtyRefunded')->willReturn($qtyRefunded);
 
         return $item;
     }
 
-    protected function createBundleItem(int $itemId, float $qtyOrdered, array $children): OrderItem&MockObject
-    {
+    protected function createBundleItem(
+        int $itemId,
+        float $qtyOrdered,
+        array $children,
+        float $qtyShipped = 0.0
+    ): OrderItem&MockObject {
         $item = $this->createMock(OrderItem::class);
         $item->method('getParentItemId')->willReturn(null);
         $item->method('getProductType')->willReturn('bundle');
@@ -224,6 +234,7 @@ class OrderEligibilityTest extends TestCase
         $item->method('getQtyOrdered')->willReturn($qtyOrdered);
         $item->method('getName')->willReturn('Bundle');
         $item->method('getSku')->willReturn('BUNDLE-1');
+        $item->method('getQtyShipped')->willReturn($qtyShipped);
         $item->method('isShipSeparately')->willReturn(true);
         $item->method('getChildrenItems')->willReturn($children);
 
@@ -442,7 +453,7 @@ class OrderEligibilityTest extends TestCase
             ->willReturn('Jan 31, 2026');
 
         $order = $this->createOrder(items: [
-            $this->createOrderItem(parentItemId: null, productType: 'simple', itemId: 10, qtyOrdered: 2),
+            $this->createOrderItem(parentItemId: null, productType: 'simple', itemId: 10, qtyOrdered: 2, qtyShipped: 2),
         ]);
 
         /** @var OrderEligibility&MockObject $service */
@@ -466,7 +477,7 @@ class OrderEligibilityTest extends TestCase
         $this->timezone->expects($this->never())->method('formatDateTime');
 
         $order = $this->createOrder(items: [
-            $this->createOrderItem(parentItemId: null, productType: 'simple', itemId: 10, qtyOrdered: 3),
+            $this->createOrderItem(parentItemId: null, productType: 'simple', itemId: 10, qtyOrdered: 3, qtyShipped: 2),
         ]);
 
         /** @var OrderEligibility&MockObject $service */
@@ -489,8 +500,8 @@ class OrderEligibilityTest extends TestCase
         $this->moduleConfig->method('getReturnPeriod')->willReturn(30);
 
         $order = $this->createOrder(items: [
-            $this->createOrderItem(parentItemId: null, productType: 'simple', itemId: 10, qtyOrdered: 5),
-            $this->createOrderItem(parentItemId: null, productType: 'simple', itemId: 20, qtyOrdered: 4),
+            $this->createOrderItem(parentItemId: null, productType: 'simple', itemId: 10, qtyOrdered: 5, qtyShipped: 2),
+            $this->createOrderItem(parentItemId: null, productType: 'simple', itemId: 20, qtyOrdered: 4, qtyShipped: 2),
         ]);
 
         /** @var OrderEligibility&MockObject $service */
@@ -517,8 +528,8 @@ class OrderEligibilityTest extends TestCase
         $this->moduleConfig->method('getReturnPeriod')->willReturn(30);
         $this->timezone->expects($this->never())->method('formatDateTime');
 
-        $childA = $this->createOrderItem(parentItemId: 30, productType: 'simple', itemId: 31, qtyOrdered: 2);
-        $childB = $this->createOrderItem(parentItemId: 30, productType: 'simple', itemId: 32, qtyOrdered: 4);
+        $childA = $this->createOrderItem(parentItemId: 30, productType: 'simple', itemId: 31, qtyOrdered: 2, qtyShipped: 2);
+        $childB = $this->createOrderItem(parentItemId: 30, productType: 'simple', itemId: 32, qtyOrdered: 4, qtyShipped: 2);
         $bundle = $this->createBundleItem(itemId: 30, qtyOrdered: 2.0, children: [$childA, $childB]);
 
         $order = $this->createOrder(items: [$bundle, $childA, $childB]);
@@ -548,8 +559,8 @@ class OrderEligibilityTest extends TestCase
             ->with('2026-02-01 10:00:00', IntlDateFormatter::MEDIUM, IntlDateFormatter::NONE, null, 'UTC')
             ->willReturn('Feb 1, 2026');
 
-        $childA = $this->createOrderItem(parentItemId: 30, productType: 'simple', itemId: 31, qtyOrdered: 2);
-        $childB = $this->createOrderItem(parentItemId: 30, productType: 'simple', itemId: 32, qtyOrdered: 4);
+        $childA = $this->createOrderItem(parentItemId: 30, productType: 'simple', itemId: 31, qtyOrdered: 2, qtyShipped: 2);
+        $childB = $this->createOrderItem(parentItemId: 30, productType: 'simple', itemId: 32, qtyOrdered: 4, qtyShipped: 4);
         $bundle = $this->createBundleItem(itemId: 30, qtyOrdered: 2.0, children: [$childA, $childB]);
 
         $order = $this->createOrder(items: [$bundle, $childA, $childB]);
@@ -574,7 +585,7 @@ class OrderEligibilityTest extends TestCase
     {
         $this->moduleConfig->method('getReturnPeriod')->willReturn(30);
 
-        $childA = $this->createOrderItem(parentItemId: 30, productType: 'simple', itemId: 31, qtyOrdered: 2);
+        $childA = $this->createOrderItem(parentItemId: 30, productType: 'simple', itemId: 31, qtyOrdered: 2, qtyShipped: 2);
         $childB = $this->createOrderItem(parentItemId: 30, productType: 'simple', itemId: 32, qtyOrdered: 4);
         $bundle = $this->createBundleItem(itemId: 30, qtyOrdered: 2.0, children: [$childA, $childB]);
 
@@ -591,6 +602,196 @@ class OrderEligibilityTest extends TestCase
 
         $this->assertCount(1, $result);
         $this->assertSame(2, $result[0]['qty_available']);
+        $this->assertTrue($result[0]['is_eligible']);
+    }
+
+    public function testGetEligibleItemsExcludesCanceledQtyWithRecentShipment(): void
+    {
+        $this->moduleConfig->method('getReturnPeriod')->willReturn(30);
+        $this->timezone->expects($this->never())->method('formatDateTime');
+
+        $order = $this->createOrder(items: [
+            $this->createOrderItem(
+                parentItemId: null,
+                productType: 'simple',
+                itemId: 10,
+                qtyOrdered: 2,
+                qtyShipped: 1,
+                qtyCanceled: 1
+            ),
+        ]);
+
+        /** @var OrderEligibility&MockObject $service */
+        $service = $this->createService(['getAlreadyRequestedQty', 'getExpiredShipments']);
+        $service->method('getAlreadyRequestedQty')->willReturn([]);
+        $service->method('getExpiredShipments')->willReturn([]);
+
+        $result = $service->getEligibleItems($order);
+
+        $this->assertCount(1, $result);
+        $this->assertSame(2, $result[0]['qty_ordered']);
+        $this->assertSame(1, $result[0]['qty_available']);
+        $this->assertTrue($result[0]['is_eligible']);
+    }
+
+    public function testGetEligibleItemsMarksCanceledRemainderWithExpiredShipmentAsNotEligible(): void
+    {
+        $this->moduleConfig->method('getReturnPeriod')->willReturn(30);
+        $this->timezone->method('getConfigTimezone')->willReturn('UTC');
+        $this->timezone->expects($this->once())
+            ->method('formatDateTime')
+            ->with('2026-01-31 10:00:00', IntlDateFormatter::MEDIUM, IntlDateFormatter::NONE, null, 'UTC')
+            ->willReturn('Jan 31, 2026');
+
+        $order = $this->createOrder(items: [
+            $this->createOrderItem(
+                parentItemId: null,
+                productType: 'simple',
+                itemId: 10,
+                qtyOrdered: 2,
+                qtyShipped: 1,
+                qtyCanceled: 1
+            ),
+        ]);
+
+        /** @var OrderEligibility&MockObject $service */
+        $service = $this->createService(['getAlreadyRequestedQty', 'getExpiredShipments']);
+        $service->method('getAlreadyRequestedQty')->willReturn([]);
+        $service->method('getExpiredShipments')->willReturn([
+            10 => ['qty' => 1.0, 'shipped_at' => '2026-01-01 10:00:00'],
+        ]);
+
+        $result = $service->getEligibleItems($order);
+
+        $this->assertCount(1, $result);
+        $this->assertSame(0, $result[0]['qty_available']);
+        $this->assertFalse($result[0]['is_eligible']);
+        $this->assertStringContainsString('Jan 31, 2026', $result[0]['disabled_reason']);
+    }
+
+    public function testGetEligibleItemsExcludesQtyRefundedBeforeShipment(): void
+    {
+        $this->moduleConfig->method('getReturnPeriod')->willReturn(30);
+
+        $order = $this->createOrder(items: [
+            $this->createOrderItem(
+                parentItemId: null,
+                productType: 'simple',
+                itemId: 10,
+                qtyOrdered: 2,
+                qtyRefunded: 1
+            ),
+        ]);
+
+        /** @var OrderEligibility&MockObject $service */
+        $service = $this->createService(['getAlreadyRequestedQty', 'getExpiredShipments']);
+        $service->method('getAlreadyRequestedQty')->willReturn([]);
+        $service->method('getExpiredShipments')->willReturn([]);
+
+        $result = $service->getEligibleItems($order);
+
+        $this->assertCount(1, $result);
+        $this->assertSame(2, $result[0]['qty_ordered']);
+        $this->assertSame(1, $result[0]['qty_available']);
+        $this->assertTrue($result[0]['is_eligible']);
+    }
+
+    public function testGetEligibleItemsSkipsFullyCanceledItem(): void
+    {
+        $this->moduleConfig->method('getReturnPeriod')->willReturn(30);
+
+        $order = $this->createOrder(items: [
+            $this->createOrderItem(
+                parentItemId: null,
+                productType: 'simple',
+                itemId: 10,
+                qtyOrdered: 2,
+                qtyCanceled: 2
+            ),
+        ]);
+
+        /** @var OrderEligibility&MockObject $service */
+        $service = $this->createService(['getAlreadyRequestedQty', 'getExpiredShipments']);
+        $service->method('getAlreadyRequestedQty')->willReturn([]);
+        $service->method('getExpiredShipments')->willReturn([]);
+
+        $this->assertSame([], $service->getEligibleItems($order));
+    }
+
+    public function testGetEligibleItemsSkipsFullyRefundedUnshippedItem(): void
+    {
+        $this->moduleConfig->method('getReturnPeriod')->willReturn(30);
+        $this->timezone->expects($this->never())->method('formatDateTime');
+
+        $order = $this->createOrder(items: [
+            $this->createOrderItem(
+                parentItemId: null,
+                productType: 'simple',
+                itemId: 10,
+                qtyOrdered: 2,
+                qtyRefunded: 2
+            ),
+        ]);
+
+        /** @var OrderEligibility&MockObject $service */
+        $service = $this->createService(['getAlreadyRequestedQty', 'getExpiredShipments']);
+        $service->method('getAlreadyRequestedQty')->willReturn([]);
+        $service->method('getExpiredShipments')->willReturn([]);
+
+        $this->assertSame([], $service->getEligibleItems($order));
+    }
+
+    public function testGetEligibleItemsDeductsCanceledQtyWhenReturnPeriodIsUnlimited(): void
+    {
+        $this->moduleConfig->method('getReturnPeriod')->willReturn(0);
+        $this->resourceConnection->expects($this->never())->method('getConnection');
+
+        $order = $this->createOrder(items: [
+            $this->createOrderItem(
+                parentItemId: null,
+                productType: 'simple',
+                itemId: 10,
+                qtyOrdered: 5,
+                qtyCanceled: 2
+            ),
+        ]);
+
+        /** @var OrderEligibility&MockObject $service */
+        $service = $this->createService(['getAlreadyRequestedQty']);
+        $service->method('getAlreadyRequestedQty')->willReturn([10 => 1]);
+
+        $result = $service->getEligibleItems($order);
+
+        $this->assertCount(1, $result);
+        $this->assertSame(5, $result[0]['qty_ordered']);
+        $this->assertSame(2, $result[0]['qty_available']);
+        $this->assertTrue($result[0]['is_eligible']);
+    }
+
+    public function testGetEligibleItemsDerivesBundleShipSeparatelyShippedQtyFromChildren(): void
+    {
+        $this->moduleConfig->method('getReturnPeriod')->willReturn(30);
+        $this->timezone->expects($this->never())->method('formatDateTime');
+
+        $childA = $this->createOrderItem(parentItemId: 30, productType: 'simple', itemId: 31, qtyOrdered: 2, qtyShipped: 2);
+        $childB = $this->createOrderItem(parentItemId: 30, productType: 'simple', itemId: 32, qtyOrdered: 4, qtyShipped: 4);
+        $bundle = $this->createBundleItem(itemId: 30, qtyOrdered: 2.0, children: [$childA, $childB], qtyShipped: 0.0);
+
+        $order = $this->createOrder(items: [$bundle, $childA, $childB]);
+
+        /** @var OrderEligibility&MockObject $service */
+        $service = $this->createService(['getAlreadyRequestedQty', 'getExpiredShipments']);
+        $service->method('getAlreadyRequestedQty')->willReturn([]);
+        $service->method('getExpiredShipments')->willReturn([
+            31 => ['qty' => 2.0, 'shipped_at' => '2026-01-01 10:00:00'],
+            32 => ['qty' => 2.0, 'shipped_at' => '2026-01-02 10:00:00'],
+        ]);
+
+        $result = $service->getEligibleItems($order);
+
+        $this->assertCount(1, $result);
+        $this->assertSame(30, $result[0]['order_item_id']);
+        $this->assertSame(1, $result[0]['qty_available']);
         $this->assertTrue($result[0]['is_eligible']);
     }
 
@@ -795,7 +996,7 @@ class OrderEligibilityTest extends TestCase
             ['soi.order_id = main_table.entity_id', null],
             ['soi.parent_item_id IS NULL', null],
             ['soi.product_type NOT IN (?)', ['virtual', 'downloadable']],
-            ['soi.qty_ordered > soi.qty_shipped', null],
+            ['soi.qty_ordered - soi.qty_canceled - soi.qty_refunded > soi.qty_shipped', null],
         ], $unshippedCalls['where']);
 
         $this->assertSame(['ss' => 'sales_shipment'], $shipmentCalls['from'][0][0]);

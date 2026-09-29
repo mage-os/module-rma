@@ -27,6 +27,7 @@ class OrderEligibility
     const TABLE_SHIPMENT = 'sales_shipment';
     const TABLE_SHIPMENT_ITEM = 'sales_shipment_item';
     const KEY_QTY = 'qty';
+    const KEY_QTY_SHIPPED = 'qty_shipped';
     const KEY_SHIPPED_AT = 'shipped_at';
     const DATE_FORMAT = 'Y-m-d H:i:s';
 
@@ -96,38 +97,49 @@ class OrderEligibility
 
             $orderItemId = (int)$orderItem->getItemId();
             $qtyOrdered = (int)$orderItem->getQtyOrdered();
+            $qtyCanceled = (int)$orderItem->getQtyCanceled();
             $qtyAlreadyRequested = $alreadyRequested[$orderItemId] ?? 0;
-            $qtyAvailable = $qtyOrdered - $qtyAlreadyRequested;
+            $qtyReturnable = $qtyOrdered - $qtyCanceled - $qtyAlreadyRequested;
 
-            if ($qtyAvailable <= 0) {
+            if ($qtyReturnable <= 0) {
                 continue;
             }
 
-            $item = [
+            $qtyAvailable = $qtyReturnable;
+            $disabledReason = '';
+
+            if ($returnPeriod > 0) {
+                $shipment = $this->getItemExpiredShipment($orderItem, $expiredShipments);
+                $qtyShipped = $shipment[self::KEY_QTY_SHIPPED];
+                $qtyNotShipped = max(
+                    0,
+                    $qtyOrdered - $qtyCanceled - (int)$orderItem->getQtyRefunded() - $qtyShipped
+                );
+                $qtyWithinPeriod = $qtyNotShipped + max(0, $qtyShipped - $shipment[self::KEY_QTY]);
+                $qtyAvailable = max(0, min($qtyReturnable, $qtyWithinPeriod));
+
+                if ($qtyAvailable === 0) {
+                    if ($shipment[self::KEY_SHIPPED_AT] === null) {
+                        continue;
+                    }
+
+                    $disabledReason = (string)__(
+                        'Return period expired on %1',
+                        $this->formatExpiryDate($shipment[self::KEY_SHIPPED_AT], $returnPeriod, $storeId)
+                    );
+                }
+            }
+
+            $items[] = [
                 'order_item_id' => $orderItemId,
                 'name' => $orderItem->getName(),
                 'sku' => $orderItem->getSku(),
                 'qty_ordered' => $qtyOrdered,
                 'qty_already_requested' => $qtyAlreadyRequested,
                 'qty_available' => $qtyAvailable,
-                'is_eligible' => true,
-                'disabled_reason' => '',
+                'is_eligible' => $qtyAvailable > 0,
+                'disabled_reason' => $disabledReason,
             ];
-
-            if ($expiredShipments) {
-                $expired = $this->getItemExpiredShipment($orderItem, $expiredShipments);
-                $item['qty_available'] = max(0, min($qtyAvailable, $qtyOrdered - $expired[self::KEY_QTY]));
-
-                if ($item['qty_available'] === 0) {
-                    $item['is_eligible'] = false;
-                    $item['disabled_reason'] = (string)__(
-                        'Return period expired on %1',
-                        $this->formatExpiryDate($expired[self::KEY_SHIPPED_AT], $returnPeriod, $storeId)
-                    );
-                }
-            }
-
-            $items[] = $item;
         }
 
         return $items;
@@ -161,7 +173,7 @@ class OrderEligibility
                 ->where('soi.order_id = main_table.entity_id')
                 ->where('soi.parent_item_id IS NULL')
                 ->where('soi.product_type NOT IN (?)', self::EXCLUDED_PRODUCT_TYPES)
-                ->where('soi.qty_ordered > soi.qty_shipped');
+                ->where('soi.qty_ordered - soi.qty_canceled - soi.qty_refunded > soi.qty_shipped');
             $recentShipments = $connection->select()
                 ->from(['ss' => $collection->getTable(self::TABLE_SHIPMENT)], [new Expression('1')])
                 ->where('ss.order_id = main_table.entity_id')
@@ -228,13 +240,14 @@ class OrderEligibility
      */
     protected function getItemExpiredShipment(OrderItemInterface $orderItem, array $expiredShipments): array
     {
-        $result = [self::KEY_QTY => 0, self::KEY_SHIPPED_AT => null];
+        $result = [self::KEY_QTY_SHIPPED => 0, self::KEY_QTY => 0, self::KEY_SHIPPED_AT => null];
 
         $children = $orderItem instanceof OrderItem && $orderItem->isShipSeparately()
             ? $orderItem->getChildrenItems()
             : [];
 
         if (!$children) {
+            $result[self::KEY_QTY_SHIPPED] = (int)$orderItem->getQtyShipped();
             $shipment = $expiredShipments[(int)$orderItem->getItemId()] ?? null;
             if ($shipment) {
                 $result[self::KEY_QTY] = (int)$shipment[self::KEY_QTY];
@@ -245,6 +258,7 @@ class OrderEligibility
         }
 
         $parentQtyOrdered = (float)$orderItem->getQtyOrdered();
+        $parentShippedQty = null;
         $parentExpiredQty = null;
         foreach ($children as $child) {
             $ratio = (float)$child->getQtyOrdered() / $parentQtyOrdered;
@@ -253,8 +267,10 @@ class OrderEligibility
             }
 
             $shipment = $expiredShipments[(int)$child->getItemId()] ?? null;
+            $childShippedQty = (int)floor((float)$child->getQtyShipped() / $ratio);
             $childExpiredQty = (int)floor(($shipment[self::KEY_QTY] ?? 0) / $ratio);
-            $parentExpiredQty = $parentExpiredQty === null ? $childExpiredQty : min($parentExpiredQty, $childExpiredQty);
+            $parentShippedQty = min($parentShippedQty ?? $childShippedQty, $childShippedQty);
+            $parentExpiredQty = min($parentExpiredQty ?? $childExpiredQty, $childExpiredQty);
 
             if ($shipment && ($result[self::KEY_SHIPPED_AT] === null
                 || $shipment[self::KEY_SHIPPED_AT] > $result[self::KEY_SHIPPED_AT])
@@ -262,6 +278,7 @@ class OrderEligibility
                 $result[self::KEY_SHIPPED_AT] = $shipment[self::KEY_SHIPPED_AT];
             }
         }
+        $result[self::KEY_QTY_SHIPPED] = $parentShippedQty ?? 0;
         $result[self::KEY_QTY] = $parentExpiredQty ?? 0;
 
         return $result;
