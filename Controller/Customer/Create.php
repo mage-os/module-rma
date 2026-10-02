@@ -34,7 +34,7 @@ class Create implements HttpGetActionInterface
         }
 
         $resultPage = $this->resultPageFactory->create();
-        $resultPage->getConfig()->getTitle()->set(__('Request Return'));
+        $resultPage->getConfig()->getTitle()->set(__('Withdraw from purchase'));
 
         $navigationBlock = $resultPage->getLayout()->getBlock('customer_account_navigation');
         if ($navigationBlock) {

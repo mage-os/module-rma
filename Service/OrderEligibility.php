@@ -4,11 +4,17 @@ declare(strict_types=1);
 
 namespace MageOS\RMA\Service;
 
+use IntlDateFormatter;
+use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\DB\Sql\Expression;
+use Magento\Sales\Model\Order\Item as OrderItem;
 use Magento\Sales\Model\ResourceModel\Order\Collection;
+use Magento\Store\Model\ScopeInterface;
 use MageOS\RMA\Helper\ModuleConfig;
 use MageOS\RMA\Model\ResourceModel\Item\CollectionFactory as RmaItemCollectionFactory;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Magento\Sales\Api\Data\OrderInterface;
+use Magento\Sales\Api\Data\OrderItemInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
 use Magento\Sales\Model\ResourceModel\Order\CollectionFactory as OrderCollectionFactory;
 use Magento\Store\Model\StoreManagerInterface;
@@ -16,6 +22,15 @@ use Magento\Framework\Exception\NoSuchEntityException;
 
 class OrderEligibility
 {
+    const EXCLUDED_PRODUCT_TYPES = ['virtual', 'downloadable'];
+    const TABLE_ORDER_ITEM = 'sales_order_item';
+    const TABLE_SHIPMENT = 'sales_shipment';
+    const TABLE_SHIPMENT_ITEM = 'sales_shipment_item';
+    const KEY_QTY = 'qty';
+    const KEY_QTY_SHIPPED = 'qty_shipped';
+    const KEY_SHIPPED_AT = 'shipped_at';
+    const DATE_FORMAT = 'Y-m-d H:i:s';
+
     /**
      * @param ModuleConfig $moduleConfig
      * @param RmaItemCollectionFactory $rmaItemCollectionFactory
@@ -23,6 +38,7 @@ class OrderEligibility
      * @param OrderRepositoryInterface $orderRepository
      * @param TimezoneInterface $timezone
      * @param StoreManagerInterface $storeManager
+     * @param ResourceConnection $resourceConnection
      */
     public function __construct(
         protected readonly ModuleConfig $moduleConfig,
@@ -30,7 +46,8 @@ class OrderEligibility
         protected readonly OrderCollectionFactory $orderCollectionFactory,
         protected readonly OrderRepositoryInterface $orderRepository,
         protected readonly TimezoneInterface $timezone,
-        protected readonly StoreManagerInterface $storeManager
+        protected readonly StoreManagerInterface $storeManager,
+        protected readonly ResourceConnection $resourceConnection
     ) {
     }
 
@@ -51,11 +68,7 @@ class OrderEligibility
             return false;
         }
 
-        if (!$this->isWithinReturnPeriod($order)) {
-            return false;
-        }
-
-        return !empty($this->getEligibleItems($order));
+        return in_array(true, array_column($this->getEligibleItems($order), 'is_eligible'), true);
     }
 
     /**
@@ -65,7 +78,12 @@ class OrderEligibility
     public function getEligibleItems(OrderInterface $order): array
     {
         $orderId = (int)$order->getEntityId();
+        $storeId = (int)$order->getStoreId();
         $alreadyRequested = $this->getAlreadyRequestedQty($orderId);
+        $returnPeriod = $this->moduleConfig->getReturnPeriod($storeId);
+        $expiredShipments = $returnPeriod > 0
+            ? $this->getExpiredShipments($orderId, $this->getCutoffDate($returnPeriod))
+            : [];
 
         $items = [];
         foreach ($order->getItems() as $orderItem) {
@@ -73,18 +91,43 @@ class OrderEligibility
                 continue;
             }
 
-            $productType = $orderItem->getProductType();
-            if (in_array($productType, ['virtual', 'downloadable'], true)) {
+            if (in_array($orderItem->getProductType(), self::EXCLUDED_PRODUCT_TYPES, true)) {
                 continue;
             }
 
             $orderItemId = (int)$orderItem->getItemId();
             $qtyOrdered = (int)$orderItem->getQtyOrdered();
+            $qtyCanceled = (int)$orderItem->getQtyCanceled();
             $qtyAlreadyRequested = $alreadyRequested[$orderItemId] ?? 0;
-            $qtyAvailable = $qtyOrdered - $qtyAlreadyRequested;
+            $qtyReturnable = $qtyOrdered - $qtyCanceled - $qtyAlreadyRequested;
 
-            if ($qtyAvailable <= 0) {
+            if ($qtyReturnable <= 0) {
                 continue;
+            }
+
+            $qtyAvailable = $qtyReturnable;
+            $disabledReason = '';
+
+            if ($returnPeriod > 0) {
+                $shipment = $this->getItemExpiredShipment($orderItem, $expiredShipments);
+                $qtyShipped = $shipment[self::KEY_QTY_SHIPPED];
+                $qtyNotShipped = max(
+                    0,
+                    $qtyOrdered - $qtyCanceled - (int)$orderItem->getQtyRefunded() - $qtyShipped
+                );
+                $qtyWithinPeriod = $qtyNotShipped + max(0, $qtyShipped - $shipment[self::KEY_QTY]);
+                $qtyAvailable = max(0, min($qtyReturnable, $qtyWithinPeriod));
+
+                if ($qtyAvailable === 0) {
+                    if ($shipment[self::KEY_SHIPPED_AT] === null) {
+                        continue;
+                    }
+
+                    $disabledReason = (string)__(
+                        'Return period expired on %1',
+                        $this->formatExpiryDate($shipment[self::KEY_SHIPPED_AT], $returnPeriod, $storeId)
+                    );
+                }
             }
 
             $items[] = [
@@ -94,6 +137,8 @@ class OrderEligibility
                 'qty_ordered' => $qtyOrdered,
                 'qty_already_requested' => $qtyAlreadyRequested,
                 'qty_available' => $qtyAvailable,
+                'is_eligible' => $qtyAvailable > 0,
+                'disabled_reason' => $disabledReason,
             ];
         }
 
@@ -122,8 +167,20 @@ class OrderEligibility
         }
 
         if ($returnPeriod > 0) {
-            $cutoffDate = date('Y-m-d H:i:s', strtotime("-{$returnPeriod} days"));
-            $collection->addFieldToFilter('created_at', ['gteq' => $cutoffDate]);
+            $connection = $collection->getConnection();
+            $unshippedItems = $connection->select()
+                ->from(['soi' => $collection->getTable(self::TABLE_ORDER_ITEM)], [new Expression('1')])
+                ->where('soi.order_id = main_table.entity_id')
+                ->where('soi.parent_item_id IS NULL')
+                ->where('soi.product_type NOT IN (?)', self::EXCLUDED_PRODUCT_TYPES)
+                ->where('soi.qty_ordered - soi.qty_canceled - soi.qty_refunded > soi.qty_shipped');
+            $recentShipments = $connection->select()
+                ->from(['ss' => $collection->getTable(self::TABLE_SHIPMENT)], [new Expression('1')])
+                ->where('ss.order_id = main_table.entity_id')
+                ->where('ss.created_at >= ?', $this->getCutoffDate($returnPeriod));
+            $collection->getSelect()->where(
+                sprintf('EXISTS (%s) OR EXISTS (%s)', $unshippedItems, $recentShipments)
+            );
         }
         $collection->setOrder('created_at', 'desc');
 
@@ -131,22 +188,117 @@ class OrderEligibility
     }
 
     /**
-     * @param OrderInterface $order
-     * @return bool
+     * @param int $returnPeriod
+     * @return string
      */
-    protected function isWithinReturnPeriod(OrderInterface $order): bool
+    protected function getCutoffDate(int $returnPeriod): string
     {
-        $storeId = (int)$order->getStoreId();
-        $returnPeriod = $this->moduleConfig->getReturnPeriod($storeId);
+        return gmdate(self::DATE_FORMAT, strtotime("-{$returnPeriod} days"));
+    }
 
-        if ($returnPeriod <= 0) {
-            return true;
+    /**
+     * @param int $orderId
+     * @param string $cutoffDate
+     * @return array
+     */
+    protected function getExpiredShipments(int $orderId, string $cutoffDate): array
+    {
+        $connection = $this->resourceConnection->getConnection();
+        $select = $connection->select()
+            ->from(
+                ['ssi' => $this->resourceConnection->getTableName(self::TABLE_SHIPMENT_ITEM)],
+                [
+                    'order_item_id',
+                    self::KEY_QTY => new Expression('SUM(ssi.qty)'),
+                    self::KEY_SHIPPED_AT => new Expression('MAX(ss.created_at)'),
+                ]
+            )
+            ->join(
+                ['ss' => $this->resourceConnection->getTableName(self::TABLE_SHIPMENT)],
+                'ss.entity_id = ssi.parent_id',
+                []
+            )
+            ->where('ss.order_id = ?', $orderId)
+            ->where('ss.created_at < ?', $cutoffDate)
+            ->group('ssi.order_item_id');
+
+        $result = [];
+        foreach ($connection->fetchAll($select) as $row) {
+            $result[(int)$row['order_item_id']] = [
+                self::KEY_QTY => (float)$row[self::KEY_QTY],
+                self::KEY_SHIPPED_AT => $row[self::KEY_SHIPPED_AT],
+            ];
         }
 
-        $orderDate = strtotime($order->getCreatedAt());
-        $cutoffDate = strtotime("-{$returnPeriod} days");
+        return $result;
+    }
 
-        return $orderDate >= $cutoffDate;
+    /**
+     * @param OrderItemInterface $orderItem
+     * @param array $expiredShipments
+     * @return array
+     */
+    protected function getItemExpiredShipment(OrderItemInterface $orderItem, array $expiredShipments): array
+    {
+        $result = [self::KEY_QTY_SHIPPED => 0, self::KEY_QTY => 0, self::KEY_SHIPPED_AT => null];
+
+        $children = $orderItem instanceof OrderItem && $orderItem->isShipSeparately()
+            ? $orderItem->getChildrenItems()
+            : [];
+
+        if (!$children) {
+            $result[self::KEY_QTY_SHIPPED] = (int)$orderItem->getQtyShipped();
+            $shipment = $expiredShipments[(int)$orderItem->getItemId()] ?? null;
+            if ($shipment) {
+                $result[self::KEY_QTY] = (int)$shipment[self::KEY_QTY];
+                $result[self::KEY_SHIPPED_AT] = $shipment[self::KEY_SHIPPED_AT];
+            }
+
+            return $result;
+        }
+
+        $parentQtyOrdered = (float)$orderItem->getQtyOrdered();
+        $parentShippedQty = null;
+        $parentExpiredQty = null;
+        foreach ($children as $child) {
+            $ratio = (float)$child->getQtyOrdered() / $parentQtyOrdered;
+            if ($ratio <= 0) {
+                continue;
+            }
+
+            $shipment = $expiredShipments[(int)$child->getItemId()] ?? null;
+            $childShippedQty = (int)floor((float)$child->getQtyShipped() / $ratio);
+            $childExpiredQty = (int)floor(($shipment[self::KEY_QTY] ?? 0) / $ratio);
+            $parentShippedQty = min($parentShippedQty ?? $childShippedQty, $childShippedQty);
+            $parentExpiredQty = min($parentExpiredQty ?? $childExpiredQty, $childExpiredQty);
+
+            if ($shipment && ($result[self::KEY_SHIPPED_AT] === null
+                || $shipment[self::KEY_SHIPPED_AT] > $result[self::KEY_SHIPPED_AT])
+            ) {
+                $result[self::KEY_SHIPPED_AT] = $shipment[self::KEY_SHIPPED_AT];
+            }
+        }
+        $result[self::KEY_QTY_SHIPPED] = $parentShippedQty ?? 0;
+        $result[self::KEY_QTY] = $parentExpiredQty ?? 0;
+
+        return $result;
+    }
+
+    /**
+     * @param string $shippedAt
+     * @param int $returnPeriod
+     * @param int $storeId
+     * @return string
+     */
+    protected function formatExpiryDate(string $shippedAt, int $returnPeriod, int $storeId): string
+    {
+        return $this->timezone->formatDateTime(
+            gmdate(self::DATE_FORMAT, strtotime("{$shippedAt} UTC +{$returnPeriod} days")),
+            IntlDateFormatter::MEDIUM,
+            IntlDateFormatter::NONE,
+            null,
+            $this->timezone->getConfigTimezone(ScopeInterface::SCOPE_STORE, $storeId)
+        );
     }
 
     /**

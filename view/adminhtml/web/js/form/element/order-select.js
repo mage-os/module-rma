@@ -130,7 +130,7 @@ define([
         renderItemsTable: function (container, items, conditions) {
             let self = this,
                 html = '<table>',
-                i, item, conditionOptions, j;
+                i, item, conditionOptions, j, reason;
 
             html += '<thead><tr>';
             html += '<th></th>';
@@ -154,12 +154,12 @@ define([
             for (i = 0; i < items.length; i++) {
                 item = items[i];
 
-                if (item.qty_available <= 0) {
-                    html += '<tr class="rma-items-row-disabled">';
-                    html += '<td><input type="checkbox" disabled/></td>';
+                if (!item.is_eligible) {
+                    reason = this.escapeHtml(item.disabled_reason);
+                    html += '<tr class="rma-items-row-disabled" title="' + reason + '">';
+                    html += '<td><input type="checkbox" disabled title="' + reason + '"/></td>';
                     html += '<td>' + this.escapeHtml(item.name) +
-                        ' <span class="rma-fully-returned">(' +
-                        $.mage.__('Fully returned') + ')</span></td>';
+                        '<div class="rma-disabled-reason">' + reason + '</div></td>';
                     html += '<td>' + this.escapeHtml(item.sku) + '</td>';
                     html += '<td>' + item.qty_ordered + '</td>';
                     html += '<td>0</td>';

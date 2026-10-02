@@ -10,10 +10,11 @@ $rmaCollection = $block->getRmaCollection();
 ?>
 <div class="mb-6">
     <div class="flex items-center justify-between mb-4">
-        <h2 class="text-2xl font-semibold text-gray-800"><?= $escaper->escapeHtml(__('My Returns')) ?></h2>
+        <h2 class="text-2xl font-semibold text-gray-800"><?= $escaper->escapeHtml(__('Withdrawals and Returns')) ?></h2>
         <a href="<?= $escaper->escapeUrl($block->getCreateUrl()) ?>"
+           title="<?= $escaper->escapeHtmlAttr(__('Cancel the order or return the items')) ?>"
            class="inline-flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded hover:bg-primary-darker transition-colors">
-            <?= $escaper->escapeHtml(__('Request Return')) ?>
+            <?= $escaper->escapeHtml(__('Withdraw from purchase')) ?>
         </a>
     </div>
 

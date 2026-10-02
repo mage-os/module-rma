@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.5.0] - 2026-09-29
+
+### Changed
+- **Return period** now starts from the shipment date instead of the order date, evaluated per item quantity: unshipped quantities are always returnable, shipped quantities only within the configured number of days (bundle products shipped separately are converted from child shipments). `0` still means no limit. Cancelled quantities and units refunded before shipment are not returnable
+- Items whose return period has expired are shown greyed out and not selectable in the customer, guest and admin RMA creation forms, with the reason ("Return period expired on …") shown below the product name and as a tooltip; `OrderEligibility::getEligibleItems()` now returns `is_eligible` and `disabled_reason` for each item
+- Customer order list for RMA creation filters orders with unshipped items (excluding cancelled and refunded quantities) or a shipment within the return period
+- "Return Period (Days)" configuration comment explains the shipment-date rule and the legal delivery-date requirement
+- **Right of withdrawal labels**: the "Request Return" buttons (order detail for customers and guests, returns history) and the RMA creation page title are now "Withdraw from purchase", with the tooltip "Cancel the order or return the items"; the form submit button is now "Confirm withdrawal"; the customer account menu link, the returns history page title and the "Back to" link are now "Withdrawals and Returns". All labels translated in the i18n CSVs
+
 ## [2.4.1] - 2026-07-23
 
 ### Fixed

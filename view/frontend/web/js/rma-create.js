@@ -96,14 +96,20 @@ define([
                 '</tr></thead><tbody>';
 
             $.each(items, function (index, item) {
-                let itemId = item.order_item_id;
+                let itemId = item.order_item_id,
+                    reason = escapeHtml(item.disabled_reason),
+                    titleAttr = item.is_eligible ? '' : ' title="' + reason.replace(/"/g, '&quot;') + '"';
 
-                html += '<tr data-item-id="' + itemId + '">' +
+                html += '<tr data-item-id="' + itemId + '"' +
+                    (item.is_eligible ? '' : ' class="rma-item-disabled"') + titleAttr + '>' +
                     '<td class="col select">' +
                     '<input type="checkbox" name="items[' + itemId + '][selected]" value="1" ' +
-                    'class="rma-item-checkbox" data-item-id="' + itemId + '"/>' +
+                    'class="rma-item-checkbox" data-item-id="' + itemId + '"' +
+                    (item.is_eligible ? '' : ' disabled="disabled"') + titleAttr + '/>' +
                     '</td>' +
-                    '<td class="col product">' + escapeHtml(item.name) + '</td>' +
+                    '<td class="col product">' + escapeHtml(item.name) +
+                    (item.is_eligible ? '' : '<div class="rma-disabled-reason">' + reason + '</div>') +
+                    '</td>' +
                     '<td class="col sku">' + escapeHtml(item.sku) + '</td>' +
                     '<td class="col qty">' +
                     '<input type="number" name="items[' + itemId + '][qty_requested]" ' +

@@ -65,8 +65,7 @@ class Create extends Template
         $collection = $this->orderEligibility->getCustomerEligibleOrders($customerId, $storeId);
 
         foreach ($collection as $order) {
-            $eligibleItems = $this->orderEligibility->getEligibleItems($order);
-            if (!empty($eligibleItems)) {
+            if ($this->orderEligibility->isOrderEligible($order)) {
                 $orders[] = [
                     'value' => (int)$order->getEntityId(),
                     'label' => sprintf(
