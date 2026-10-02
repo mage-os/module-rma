@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.5.1] - 2026-10-02
+
+### Fixed
+- Units refunded before shipment are no longer returnable when Return Period is `0` (no limit): shipped and unshipped quantities are now calculated whatever the return period, only the expiry check depends on it; fully refunded unshipped items are no longer listed (#54)
+
 ## [2.5.0] - 2026-09-29
 
 ### Changed

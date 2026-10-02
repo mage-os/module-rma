@@ -105,29 +105,25 @@ class OrderEligibility
                 continue;
             }
 
-            $qtyAvailable = $qtyReturnable;
+            $shipment = $this->getItemExpiredShipment($orderItem, $expiredShipments);
+            $qtyShipped = $shipment[self::KEY_QTY_SHIPPED];
+            $qtyNotShipped = max(
+                0,
+                $qtyOrdered - $qtyCanceled - (int)$orderItem->getQtyRefunded() - $qtyShipped
+            );
+            $qtyWithinPeriod = $qtyNotShipped + max(0, $qtyShipped - $shipment[self::KEY_QTY]);
+            $qtyAvailable = max(0, min($qtyReturnable, $qtyWithinPeriod));
             $disabledReason = '';
 
-            if ($returnPeriod > 0) {
-                $shipment = $this->getItemExpiredShipment($orderItem, $expiredShipments);
-                $qtyShipped = $shipment[self::KEY_QTY_SHIPPED];
-                $qtyNotShipped = max(
-                    0,
-                    $qtyOrdered - $qtyCanceled - (int)$orderItem->getQtyRefunded() - $qtyShipped
-                );
-                $qtyWithinPeriod = $qtyNotShipped + max(0, $qtyShipped - $shipment[self::KEY_QTY]);
-                $qtyAvailable = max(0, min($qtyReturnable, $qtyWithinPeriod));
-
-                if ($qtyAvailable === 0) {
-                    if ($shipment[self::KEY_SHIPPED_AT] === null) {
-                        continue;
-                    }
-
-                    $disabledReason = (string)__(
-                        'Return period expired on %1',
-                        $this->formatExpiryDate($shipment[self::KEY_SHIPPED_AT], $returnPeriod, $storeId)
-                    );
+            if ($qtyAvailable === 0) {
+                if ($shipment[self::KEY_SHIPPED_AT] === null) {
+                    continue;
                 }
+
+                $disabledReason = (string)__(
+                    'Return period expired on %1',
+                    $this->formatExpiryDate($shipment[self::KEY_SHIPPED_AT], $returnPeriod, $storeId)
+                );
             }
 
             $items[] = [
