@@ -768,6 +768,57 @@ class OrderEligibilityTest extends TestCase
         $this->assertTrue($result[0]['is_eligible']);
     }
 
+    public function testGetEligibleItemsSkipsFullyRefundedUnshippedItemWhenReturnPeriodIsUnlimited(): void
+    {
+        $this->moduleConfig->method('getReturnPeriod')->willReturn(0);
+        $this->resourceConnection->expects($this->never())->method('getConnection');
+        $this->timezone->expects($this->never())->method('formatDateTime');
+
+        $order = $this->createOrder(items: [
+            $this->createOrderItem(
+                parentItemId: null,
+                productType: 'simple',
+                itemId: 10,
+                qtyOrdered: 2,
+                qtyRefunded: 2
+            ),
+        ]);
+
+        /** @var OrderEligibility&MockObject $service */
+        $service = $this->createService(['getAlreadyRequestedQty']);
+        $service->method('getAlreadyRequestedQty')->willReturn([]);
+
+        $this->assertSame([], $service->getEligibleItems($order));
+    }
+
+    public function testGetEligibleItemsExcludesQtyRefundedBeforeShipmentWhenReturnPeriodIsUnlimited(): void
+    {
+        $this->moduleConfig->method('getReturnPeriod')->willReturn(0);
+        $this->resourceConnection->expects($this->never())->method('getConnection');
+
+        $order = $this->createOrder(items: [
+            $this->createOrderItem(
+                parentItemId: null,
+                productType: 'simple',
+                itemId: 10,
+                qtyOrdered: 2,
+                qtyShipped: 1,
+                qtyRefunded: 1
+            ),
+        ]);
+
+        /** @var OrderEligibility&MockObject $service */
+        $service = $this->createService(['getAlreadyRequestedQty']);
+        $service->method('getAlreadyRequestedQty')->willReturn([]);
+
+        $result = $service->getEligibleItems($order);
+
+        $this->assertCount(1, $result);
+        $this->assertSame(2, $result[0]['qty_ordered']);
+        $this->assertSame(1, $result[0]['qty_available']);
+        $this->assertTrue($result[0]['is_eligible']);
+    }
+
     public function testGetEligibleItemsDerivesBundleShipSeparatelyShippedQtyFromChildren(): void
     {
         $this->moduleConfig->method('getReturnPeriod')->willReturn(30);
