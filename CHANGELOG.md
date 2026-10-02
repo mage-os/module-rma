@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [2.5.0] - 2026-09-29
 
 ### Changed
 - **Return period** now starts from the shipment date instead of the order date, evaluated per item quantity: unshipped quantities are always returnable, shipped quantities only within the configured number of days (bundle products shipped separately are converted from child shipments). `0` still means no limit. Cancelled quantities and units refunded before shipment are not returnable
