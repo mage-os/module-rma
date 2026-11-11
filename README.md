@@ -69,6 +69,15 @@ Module entries are located under **Sales > RMA**:
 - **Resolution Types** — manage resolution types (refund, replacement, etc.)
 - **Item Conditions** — manage item conditions (opened, sealed, etc.)
 
+### Store view values of statuses, reasons, resolution types and item conditions
+
+Besides a label per store view, each of these entities can be enabled, disabled or reordered per store view. On its edit form, the section **Store View Specific Status and Sort Order** has two fields for every store view:
+
+- **Active** — `Use Default`, `Yes` or `No`. `Yes` also enables an entity that is disabled by default, so a reason can exist in one store view only
+- **Sort Order** — empty means the default sort order
+
+The lists on the customer and guest forms use the values of the current store view. The admin lists and forms always use the defaults. In code the values travel with the entity as `store_values` (`[store id => ['is_active' => ..., 'sort_order' => ...]]`), next to `store_labels`.
+
 ### Creating an RMA from admin
 
 1. Go to **Sales > RMA > RMA Requests**, click **Add New RMA**

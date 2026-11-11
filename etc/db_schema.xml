@@ -165,7 +165,9 @@
     <table name="rma_status_label" resource="default" engine="innodb" comment="RMA Status Store Label">
         <column xsi:type="int" name="status_id" unsigned="true" nullable="false" comment="Status ID"/>
         <column xsi:type="smallint" name="store_id" unsigned="true" nullable="false" comment="Store ID"/>
-        <column xsi:type="varchar" name="label" nullable="false" length="255" comment="Label"/>
+        <column xsi:type="varchar" name="label" nullable="true" length="255" comment="Label"/>
+        <column xsi:type="smallint" name="is_active" unsigned="true" nullable="true" comment="Is Active in the store view, NULL = use default"/>
+        <column xsi:type="int" name="sort_order" unsigned="true" nullable="true" comment="Sort Order in the store view, NULL = use default"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="status_id"/>
             <column name="store_id"/>
@@ -187,7 +189,9 @@
     <table name="rma_reason_label" resource="default" engine="innodb" comment="RMA Reason Store Label">
         <column xsi:type="int" name="reason_id" unsigned="true" nullable="false" comment="Reason ID"/>
         <column xsi:type="smallint" name="store_id" unsigned="true" nullable="false" comment="Store ID"/>
-        <column xsi:type="varchar" name="label" nullable="false" length="255" comment="Label"/>
+        <column xsi:type="varchar" name="label" nullable="true" length="255" comment="Label"/>
+        <column xsi:type="smallint" name="is_active" unsigned="true" nullable="true" comment="Is Active in the store view, NULL = use default"/>
+        <column xsi:type="int" name="sort_order" unsigned="true" nullable="true" comment="Sort Order in the store view, NULL = use default"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="reason_id"/>
             <column name="store_id"/>
@@ -209,7 +213,9 @@
     <table name="rma_resolution_type_label" resource="default" engine="innodb" comment="RMA Resolution Type Store Label">
         <column xsi:type="int" name="resolution_type_id" unsigned="true" nullable="false" comment="Resolution Type ID"/>
         <column xsi:type="smallint" name="store_id" unsigned="true" nullable="false" comment="Store ID"/>
-        <column xsi:type="varchar" name="label" nullable="false" length="255" comment="Label"/>
+        <column xsi:type="varchar" name="label" nullable="true" length="255" comment="Label"/>
+        <column xsi:type="smallint" name="is_active" unsigned="true" nullable="true" comment="Is Active in the store view, NULL = use default"/>
+        <column xsi:type="int" name="sort_order" unsigned="true" nullable="true" comment="Sort Order in the store view, NULL = use default"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="resolution_type_id"/>
             <column name="store_id"/>
@@ -231,7 +237,9 @@
     <table name="rma_item_condition_label" resource="default" engine="innodb" comment="RMA Item Condition Store Label">
         <column xsi:type="int" name="condition_id" unsigned="true" nullable="false" comment="Condition ID"/>
         <column xsi:type="smallint" name="store_id" unsigned="true" nullable="false" comment="Store ID"/>
-        <column xsi:type="varchar" name="label" nullable="false" length="255" comment="Label"/>
+        <column xsi:type="varchar" name="label" nullable="true" length="255" comment="Label"/>
+        <column xsi:type="smallint" name="is_active" unsigned="true" nullable="true" comment="Is Active in the store view, NULL = use default"/>
+        <column xsi:type="int" name="sort_order" unsigned="true" nullable="true" comment="Sort Order in the store view, NULL = use default"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="condition_id"/>
             <column name="store_id"/>

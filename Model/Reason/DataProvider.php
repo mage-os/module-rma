@@ -60,6 +60,7 @@ class DataProvider extends ModifierPoolDataProvider
         foreach ($items as $reason) {
             $data = $reason->getData();
             $data['store_labels'] = $this->reasonResource->getStoreLabels($reason);
+            $data['store_values'] = $this->reasonResource->getStoreValues($reason);
             $this->loadedData[$reason->getId()] = $data;
         }
 

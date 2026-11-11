@@ -9,6 +9,8 @@ use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 
 class ResolutionType extends AbstractDb
 {
+    use LookupStoreRowsTrait;
+
     /**
      * @var string
      */
@@ -27,6 +29,7 @@ class ResolutionType extends AbstractDb
         $this->_init('rma_resolution_type', 'entity_id');
         $this->_useIsObjectNew = true;
         $this->labelsTable = $this->getTable('rma_resolution_type_label');
+        $this->labelForeignKey = 'resolution_type_id';
     }
 
     /**
@@ -38,7 +41,8 @@ class ResolutionType extends AbstractDb
         $connection = $this->getConnection();
         $select = $connection->select()
             ->from($this->labelsTable, ['store_id', 'label'])
-            ->where('resolution_type_id = ?', (int)$object->getId());
+            ->where('resolution_type_id = ?', (int)$object->getId())
+            ->where('label IS NOT NULL');
 
         return $connection->fetchPairs($select);
     }
@@ -53,6 +57,7 @@ class ResolutionType extends AbstractDb
 
         if ($object->getId()) {
             $object->setData('store_labels', $this->getStoreLabels($object));
+            $object->setData('store_values', $this->getStoreValues($object));
         }
 
         return $this;
@@ -66,27 +71,7 @@ class ResolutionType extends AbstractDb
     {
         parent::_afterSave($object);
 
-        if ($object->hasData('store_labels')) {
-            $connection = $this->getConnection();
-            $connection->delete($this->labelsTable, ['resolution_type_id = ?' => (int)$object->getId()]);
-
-            $labels = $object->getData('store_labels');
-            $data = [];
-            foreach ($labels as $storeId => $label) {
-                if (empty($label)) {
-                    continue;
-                }
-                $data[] = [
-                    'resolution_type_id' => (int)$object->getId(),
-                    'store_id' => (int)$storeId,
-                    'label' => $label,
-                ];
-            }
-
-            if (!empty($data)) {
-                $connection->insertMultiple($this->labelsTable, $data);
-            }
-        }
+        $this->saveStoreRows($object);
 
         return $this;
     }

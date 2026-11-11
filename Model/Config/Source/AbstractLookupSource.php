@@ -48,23 +48,79 @@ abstract class AbstractLookupSource implements OptionSourceInterface
         if ($this->options === null) {
             $storeId = (int)$this->storeManager->getStore()->getId();
             $collection = $this->createCollection();
-            $collection->addFieldToFilter('is_active', 1);
+            $storeLabelMap = $this->getStoreLabelMap($storeId, $collection);
+            $storeValueMap = $this->getStoreValueMap($storeId, $collection);
+
+            // A store view can enable an entity that is disabled by default, so once the store view
+            // carries values the "is_active" filter and the order are applied below, not in the query
+            if (empty($storeValueMap)) {
+                $collection->addFieldToFilter('is_active', 1);
+            }
             $collection->setOrder('sort_order', 'ASC');
 
-            $storeLabelMap = $this->getStoreLabelMap($storeId, $collection);
-
-            $this->options = [];
+            $options = [];
             foreach ($collection as $entity) {
                 $entityId = (int)$entity->getEntityId();
+                $storeValues = $storeValueMap[$entityId] ?? [];
+
+                if (!(int)($storeValues['is_active'] ?? $entity->getIsActive())) {
+                    continue;
+                }
+
                 $label = $storeLabelMap[$entityId] ?? $entity->getLabel();
-                $this->options[] = [
+                $options[] = [
                     'value' => $entityId,
                     'label' => (string)__($label),
+                    'sort_order' => (int)($storeValues['sort_order'] ?? $entity->getSortOrder()),
                 ];
             }
+
+            if (!empty($storeValueMap)) {
+                // usort() is stable: entities with the same sort order keep the order of the collection
+                usort($options, static fn (array $a, array $b): int => $a['sort_order'] <=> $b['sort_order']);
+            }
+
+            $this->options = array_map(
+                static fn (array $option): array => ['value' => $option['value'], 'label' => $option['label']],
+                $options
+            );
         }
 
         return $this->options;
+    }
+
+    /**
+     * Store view values of "is_active" and "sort_order"; an entity or a field without a value is absent
+     *
+     * @param int $storeId
+     * @param AbstractCollection $collection
+     * @return array [entity id => ['is_active' => int, 'sort_order' => int]]
+     */
+    protected function getStoreValueMap(int $storeId, AbstractCollection $collection): array
+    {
+        if ($storeId === 0) {
+            return [];
+        }
+
+        $foreignKey = $this->getLabelForeignKey();
+        $connection = $collection->getConnection();
+        $select = $connection->select()
+            ->from($collection->getTable($this->getLabelTable()), [$foreignKey, 'is_active', 'sort_order'])
+            ->where('store_id = ?', $storeId)
+            ->where('is_active IS NOT NULL OR sort_order IS NOT NULL');
+
+        $map = [];
+        foreach ($connection->fetchAll($select) as $row) {
+            $map[(int)$row[$foreignKey]] = array_map(
+                'intval',
+                array_filter(
+                    ['is_active' => $row['is_active'], 'sort_order' => $row['sort_order']],
+                    static fn ($value): bool => $value !== null
+                )
+            );
+        }
+
+        return $map;
     }
 
     /**
