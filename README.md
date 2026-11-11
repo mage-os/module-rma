@@ -220,6 +220,8 @@ Each entity exposes a repository with interfaces in `Api/`:
 
 All `getList` methods support `SearchCriteriaInterface` for filtering, sorting and pagination.
 
+To create a return from code, use `RmaManagementInterface::createRma()` (implemented by `Service\RmaSubmitService`). It runs the eligibility and quantity checks and saves the request, its items and its attachments in one transaction, which `RMARepositoryInterface::save()` and `RmaItemManagementInterface::save()` do not do.
+
 ## Business Events
 
 The module dispatches custom events in `RMARepository::save()` to allow other modules to react to return lifecycle changes.
