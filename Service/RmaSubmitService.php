@@ -65,10 +65,14 @@ class RmaSubmitService
                 continue;
             }
 
+            // Fields posted next to the known ones (a reason per item, for example) are kept,
+            // so observers of the "rma_item_create_*" events can read them
+            $extraData = array_diff_key($itemData, array_flip(['selected', 'qty_requested', 'condition_id']));
+
             $selected[(int)$orderItemId] = [
                 'qty_requested' => $qtyRequested,
                 'condition_id' => !empty($itemData['condition_id']) ? (int)$itemData['condition_id'] : null,
-            ];
+            ] + $extraData;
         }
 
         return $selected;
@@ -174,7 +178,11 @@ class RmaSubmitService
             $item->setOrderItemId($orderItemId);
             $item->setQtyRequested($itemData['qty_requested']);
             $item->setConditionId($itemData['condition_id']);
+
+            $eventData = ['item' => $item, 'item_data' => $itemData, 'order' => $order];
+            $this->eventManager->dispatch('rma_item_create_before', $eventData);
             $this->itemRepository->save($item);
+            $this->eventManager->dispatch('rma_item_create_after', $eventData);
         }
     }
 
