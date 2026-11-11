@@ -129,6 +129,9 @@ define([
 
             $itemsContainer.html(html);
             bindItemEvents();
+
+            // Lets other modules add markup to the rendered rows (each row carries data-item-id)
+            $form.trigger('rmaItemsRendered', [items]);
         }
 
         function buildConditionSelect(itemId) {
