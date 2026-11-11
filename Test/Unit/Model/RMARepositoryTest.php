@@ -15,12 +15,11 @@ use MageOS\RMA\Model\RMARepository;
 use MageOS\RMA\Model\ResourceModel\RMA as ResourceModel;
 use MageOS\RMA\Model\ResourceModel\RMA\CollectionFactory;
 use Magento\Framework\Api\SearchCriteria\CollectionProcessorInterface;
-use Magento\Framework\DB\Adapter\AdapterInterface;
-use Magento\Framework\DB\Select;
 use Magento\Framework\Event\ManagerInterface as EventManagerInterface;
 use Magento\Framework\Exception\CouldNotDeleteException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -33,8 +32,6 @@ class RMARepositoryTest extends TestCase
     private CollectionProcessorInterface&MockObject $collectionProcessor;
     private EventManagerInterface&MockObject $eventManager;
     private StatusResolver&MockObject $statusResolver;
-    private AdapterInterface&MockObject $connection;
-    private Select&MockObject $select;
     private RMARepository $repository;
 
     protected function setUp(): void
@@ -46,14 +43,6 @@ class RMARepositoryTest extends TestCase
         $this->collectionProcessor  = $this->createMock(CollectionProcessorInterface::class);
         $this->eventManager       = $this->createMock(EventManagerInterface::class);
         $this->statusResolver     = $this->createMock(StatusResolver::class);
-        $this->connection         = $this->createMock(AdapterInterface::class);
-        $this->select             = $this->createMock(Select::class);
-
-        $this->select->method('from')->willReturnSelf();
-        $this->select->method('where')->willReturnSelf();
-        $this->connection->method('select')->willReturn($this->select);
-        $this->resourceModel->method('getConnection')->willReturn($this->connection);
-        $this->resourceModel->method('getMainTable')->willReturn('rma_entity');
 
         $this->repository = new RMARepository(
             $this->resourceModel,
@@ -64,6 +53,18 @@ class RMARepositoryTest extends TestCase
             $this->eventManager,
             $this->statusResolver
         );
+    }
+
+    /**
+     * save() reads the stored status through get(), which loads a fresh RMA from the factory.
+     */
+    private function stubStoredRma(int $entityId, int $statusId): void
+    {
+        $storedRma = $this->createMock(RMA::class);
+        $storedRma->method('getEntityId')->willReturn($entityId);
+        $storedRma->method('getStatusId')->willReturn($statusId);
+
+        $this->rmaFactory->method('create')->willReturn($storedRma);
     }
 
     // -------------------------------------------------------------------------
@@ -169,7 +170,7 @@ class RMARepositoryTest extends TestCase
         $rma->method('getEntityId')->willReturn(10);
         $rma->method('getStatusId')->willReturn(2);
 
-        $this->connection->method('fetchOne')->willReturn('2');
+        $this->stubStoredRma(10, 2);
 
         $this->eventManager->expects($this->never())->method('dispatch');
 
@@ -186,7 +187,7 @@ class RMARepositoryTest extends TestCase
         $rma->method('getEntityId')->willReturn(10);
         $rma->method('getStatusId')->willReturn(3);
 
-        $this->connection->method('fetchOne')->willReturn('2');
+        $this->stubStoredRma(10, 2);
         $this->statusResolver->method('getCodeById')->with(3)->willReturn('need_details');
 
         $this->eventManager->expects($this->once())
@@ -204,9 +205,7 @@ class RMARepositoryTest extends TestCase
     // dispatchSemanticStatusEvent
     // -------------------------------------------------------------------------
 
-    /**
-     * @dataProvider semanticStatusEventProvider
-     */
+    #[DataProvider('semanticStatusEventProvider')]
     public function testSaveDispatchesSemanticEventForKnownStatusCode(
         string $statusCode,
         string $expectedEvent
@@ -215,7 +214,7 @@ class RMARepositoryTest extends TestCase
         $rma->method('getEntityId')->willReturn(10);
         $rma->method('getStatusId')->willReturn(5);
 
-        $this->connection->method('fetchOne')->willReturn('1');
+        $this->stubStoredRma(10, 1);
         $this->statusResolver->method('getCodeById')->with(5)->willReturn($statusCode);
 
         $dispatched = [];
@@ -248,7 +247,7 @@ class RMARepositoryTest extends TestCase
         $rma->method('getEntityId')->willReturn(10);
         $rma->method('getStatusId')->willReturn(5);
 
-        $this->connection->method('fetchOne')->willReturn('1');
+        $this->stubStoredRma(10, 1);
         // need_details is not in STATUS_EVENT_MAP
         $this->statusResolver->method('getCodeById')->willReturn(StatusCodes::NEED_DETAILS);
 
@@ -270,7 +269,7 @@ class RMARepositoryTest extends TestCase
         $rma->method('getEntityId')->willReturn(10);
         $rma->method('getStatusId')->willReturn(5);
 
-        $this->connection->method('fetchOne')->willReturn('1');
+        $this->stubStoredRma(10, 1);
         $this->statusResolver->method('getCodeById')->willReturn(null);
 
         $dispatched = [];
