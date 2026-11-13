@@ -230,12 +230,15 @@ The module dispatches custom events in `RMARepository::save()` to allow other mo
 2. **Status change**: when the status changes, **two** events fire in sequence:
    - `rma_status_change_after` (generic, fires on any transition)
    - A specific semantic event based on the new status (e.g. `rma_approved_after`)
+3. **Items**: `RmaSubmitService::saveItems()` fires `rma_item_create_before` and `rma_item_create_after` around each item of a submitted request. `item_data` holds the fields posted for that item, including the ones the module does not know (for example a `reason_id` per item). When the items are saved through `createRma()`, both events run inside its transaction
 
 ### Events table
 
 | Event | When it fires | Available data |
 |---|---|---|
 | `rma_created_after` | New RMA created | `rma` |
+| `rma_item_create_before` | Before an item of a submitted request is saved | `item`, `item_data`, `order` |
+| `rma_item_create_after` | After an item of a submitted request is saved | `item`, `item_data`, `order` |
 | `rma_status_change_after` | Any status change | `rma`, `old_status_id`, `new_status_id` |
 | `rma_approved_after` | Status &rarr; Approved | `rma`, `old_status_id`, `new_status_id` |
 | `rma_rejected_after` | Status &rarr; Rejected | `rma`, `old_status_id`, `new_status_id` |
