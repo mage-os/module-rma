@@ -94,6 +94,7 @@
     <!-- Management Interfaces -->
     <preference for="MageOS\RMA\Api\RmaCommentManagementInterface" type="MageOS\RMA\Model\RmaCommentManagement"/>
     <preference for="MageOS\RMA\Api\RmaItemManagementInterface" type="MageOS\RMA\Model\RmaItemManagement"/>
+    <preference for="MageOS\RMA\Api\RmaManagementInterface" type="MageOS\RMA\Service\RmaSubmitService"/>
 
     <!-- Listing Actions Virtual Types -->
     <virtualType name="MageOS\RMA\Ui\Component\Listing\Column\ReasonActions" type="MageOS\RMA\Ui\Component\Listing\Column\GenericEntityActions">

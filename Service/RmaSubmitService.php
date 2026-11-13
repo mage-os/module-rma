@@ -9,6 +9,7 @@ use MageOS\RMA\Api\Data\RMAInterface;
 use MageOS\RMA\Api\Data\RMAInterfaceFactory;
 use MageOS\RMA\Api\Data\StatusInterface;
 use MageOS\RMA\Api\ItemRepositoryInterface;
+use MageOS\RMA\Api\RmaManagementInterface;
 use MageOS\RMA\Api\RMARepositoryInterface;
 use MageOS\RMA\Helper\ModuleConfig;
 use MageOS\RMA\Model\ItemFactory;
@@ -20,7 +21,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\Data\OrderInterface;
 use Throwable;
 
-class RmaSubmitService
+class RmaSubmitService implements RmaManagementInterface
 {
     /**
      * @param RMARepositoryInterface $rmaRepository
