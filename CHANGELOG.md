@@ -1,9 +1,20 @@
 # Changelog
 
-## [Unreleased]
+## [2.6.0] - 2026-11-13
 
 ### Added
-- `rma_email_send_before` event, dispatched before each RMA email is sent: observers receive the RMA, the email type (`SenderInterface::EMAIL_TYPE_*`) and a transport object, and can change the template and the template variables without replacing `SenderInterface`
+- `rma_email_send_before` event, dispatched before each RMA email is sent: observers receive the RMA, the email type (`SenderInterface::EMAIL_TYPE_*`) and a transport object, and can change the template and the template variables without replacing `SenderInterface` by @Bashev in #58
+- `rma_item_create_before` and `rma_item_create_after` events, dispatched around each item saved by `RmaSubmitService::saveItems()` with the item, its posted data and the order; `getSelectedItems()` now keeps the extra per-item fields posted next to `qty_requested` and `condition_id` by @Bashev in #64
+- `Api\RmaManagementInterface` (`@api`) service contract with `createRma()`, implemented by `RmaSubmitService` and bound in `di.xml` by @Bashev in #65
+- Extension points in the create-request forms: `additional` child block in all four `create.phtml` templates, `item_columns_head` and `item_columns` child blocks in the Hyvä customer and guest templates, `rmaItemsRendered` event in the Luma `rma-create.js` by @Bashev in #66
+- Store view values for `is_active` and `sort_order` of statuses, reasons, resolution types and item conditions, with a new "Store View Specific Status and Sort Order" section in the admin forms by @Bashev in #67
+
+### Changed
+- `Service\Email\Sender::__construct()` takes `EventManagerInterface` as its last argument; subclasses calling `parent::__construct()` positionally need the extra argument (#58)
+- The four `*_label` lookup tables get nullable `is_active` and `sort_order` columns and `label` becomes nullable; `getStoreLabels()` of the lookup resource models skips rows without a label (#67)
+
+### Fixed
+- Unit tests no longer matching the code (`RmaSubmitServiceTest`, `RMARepositoryTest`) and `@dataProvider` docblocks replaced with the `#[DataProvider]` attribute for PHPUnit 12 by @Bashev in #59
 
 ## [2.5.1] - 2026-10-02
 
