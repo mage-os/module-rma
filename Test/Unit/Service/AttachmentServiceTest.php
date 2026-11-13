@@ -16,6 +16,7 @@ use Magento\Framework\Filesystem;
 use Magento\Framework\Filesystem\Directory\WriteInterface;
 use Magento\Framework\Serialize\Serializer\Json as JsonSerializer;
 use Magento\MediaStorage\Model\File\UploaderFactory;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -117,9 +118,7 @@ class AttachmentServiceTest extends TestCase
     // formatFileSize
     // -------------------------------------------------------------------------
 
-    /**
-     * @dataProvider fileSizeProvider
-     */
+    #[DataProvider('fileSizeProvider')]
     public function testFormatFileSize(int $bytes, string $expected): void
     {
         $this->assertSame($expected, $this->service->formatFileSize($bytes));

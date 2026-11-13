@@ -18,6 +18,7 @@ use MageOS\RMA\Service\OrderEligibility;
 use MageOS\RMA\Service\RmaSubmitService;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\AdapterInterface;
+use Magento\Framework\Event\ManagerInterface as EventManagerInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\Data\OrderInterface;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -35,6 +36,7 @@ class RmaSubmitServiceTest extends TestCase
     private OrderEligibility&MockObject $orderEligibility;
     private ResourceConnection&MockObject $resourceConnection;
     private AdapterInterface&MockObject $connection;
+    private EventManagerInterface&MockObject $eventManager;
     private RmaSubmitService $service;
 
     protected function setUp(): void
@@ -49,6 +51,7 @@ class RmaSubmitServiceTest extends TestCase
         $this->orderEligibility = $this->createMock(OrderEligibility::class);
         $this->resourceConnection = $this->createMock(ResourceConnection::class);
         $this->connection = $this->createMock(AdapterInterface::class);
+        $this->eventManager = $this->createMock(EventManagerInterface::class);
 
         $this->resourceConnection->method('getConnection')->willReturn($this->connection);
 
@@ -61,7 +64,8 @@ class RmaSubmitServiceTest extends TestCase
             $this->moduleConfig,
             $this->attachmentService,
             $this->orderEligibility,
-            $this->resourceConnection
+            $this->resourceConnection,
+            $this->eventManager
         );
     }
 
@@ -267,6 +271,45 @@ class RmaSubmitServiceTest extends TestCase
         );
     }
 
+    public function testCreateRmaDispatchesCommitAfterEventOnceCommitted(): void
+    {
+        $order = $this->createMock(OrderInterface::class);
+        $order->method('getStoreId')->willReturn(1);
+        $order->method('getEntityId')->willReturn(100);
+
+        $this->moduleConfig->method('isAutoApproveEnabled')->willReturn(false);
+
+        $statusItem = $this->createMock(\MageOS\RMA\Api\Data\StatusInterface::class);
+        $statusItem->method('getEntityId')->willReturn(1);
+
+        $statusCollection = $this->createMock(\MageOS\RMA\Model\ResourceModel\Status\Collection::class);
+        $statusCollection->method('addFieldToFilter')->willReturnSelf();
+        $statusCollection->method('setPageSize')->willReturnSelf();
+        $statusCollection->method('getFirstItem')->willReturn($statusItem);
+        $this->statusCollectionFactory->method('create')->willReturn($statusCollection);
+
+        $rma = $this->createMock(RMAInterface::class);
+        $rma->method('getEntityId')->willReturn(10);
+        $this->rmaFactory->method('create')->willReturn($rma);
+
+        $this->orderEligibility->method('getEligibleItems')->willReturn([]);
+
+        $this->connection->expects($this->once())->method('commit');
+        $this->eventManager->expects($this->once())
+            ->method('dispatch')
+            ->with('rma_commit_after', ['rma' => $rma]);
+
+        $this->service->createRma(
+            order: $order,
+            customerId: 1,
+            customerEmail: 'test@example.com',
+            customerName: 'Test User',
+            reasonId: 1,
+            resolutionTypeId: 1,
+            selectedItems: []
+        );
+    }
+
     public function testCreateRmaRollsBackTransactionOnException(): void
     {
         $order = $this->createMock(OrderInterface::class);
@@ -293,6 +336,7 @@ class RmaSubmitServiceTest extends TestCase
         $this->connection->expects($this->once())->method('beginTransaction');
         $this->connection->expects($this->once())->method('rollBack');
         $this->connection->expects($this->never())->method('commit');
+        $this->eventManager->expects($this->never())->method('dispatch');
 
         $this->expectException(\RuntimeException::class);
 
