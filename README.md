@@ -168,6 +168,31 @@ Guests (orders without an account) can request a return from the guest order det
 
 > Guests do not have a "Withdrawals and Returns" section — they can only create returns from the order detail page.
 
+## Extending the create forms
+
+The customer and guest create forms (Luma and Hyvä) render child blocks at fixed places, so another module can add fields without replacing the templates. Add the blocks to `rma.customer.create` / `rma.guest.create` in layout XML with these aliases:
+
+| Alias | Rendered | Templates |
+|---|---|---|
+| `additional` | After the form fields, inside the form | Luma and Hyvä |
+| `item_columns_head` | After the last header cell of the items table; output a `<th>` | Hyvä |
+| `item_columns` | After the last cell of each item row; output a `<td>`. It sits inside the Alpine `x-for`, so `item` is in scope | Hyvä |
+
+```html
+<!-- a Hyvä `item_columns` child -->
+<td class="px-4 py-3">
+    <input type="text" :name="'items[' + item.order_item_id + '][note]'" x-model="item.note" :disabled="!item.selected"/>
+</td>
+```
+
+On Luma the items table is built in `MageOS_RMA/js/rma-create`. After each render it triggers `rmaItemsRendered` on the form, with the loaded items as argument; every row carries `data-item-id`:
+
+```js
+$('#rma-create-form').on('rmaItemsRendered', function (event, items) {
+    // add a cell to each row, for example an input named items[<order_item_id>][note]
+});
+```
+
 ## Order Eligibility for RMA
 
 An order is eligible for a return request if **all** of these conditions are met:

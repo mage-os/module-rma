@@ -129,6 +129,7 @@ $resolutionTypes = $block->getResolutionTypes();
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase w-40">
                                             <?= $escaper->escapeHtml(__('Condition')) ?>
                                         </th>
+                                        <?= $block->getChildHtml('item_columns_head') ?>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
@@ -175,6 +176,7 @@ $resolutionTypes = $block->getResolutionTypes();
                                                     </template>
                                                 </select>
                                             </td>
+                                            <?= $block->getChildHtml('item_columns') ?>
                                         </tr>
                                     </template>
                                 </tbody>
@@ -246,6 +248,8 @@ $resolutionTypes = $block->getResolutionTypes();
                 </template>
                 <input type="hidden" name="attachments" :value="JSON.stringify(uploadedFiles)"/>
             </div>
+
+            <?= $block->getChildHtml('additional') ?>
         </div>
 
         <div class="flex items-center justify-between mt-6">
