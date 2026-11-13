@@ -12,6 +12,13 @@ use MageOS\RMA\Api\Data\RMAInterface;
 interface SenderInterface
 {
     /**
+     * Email types passed to the "rma_email_send_before" event
+     */
+    const EMAIL_TYPE_CUSTOMER_NEW = 'customer_new';
+    const EMAIL_TYPE_CUSTOMER_STATUS_CHANGE = 'customer_status_change';
+    const EMAIL_TYPE_ADMIN_NEW = 'admin_new';
+
+    /**
      * @param RMAInterface $rma
      * @return void
      */

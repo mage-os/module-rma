@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- `rma_email_send_before` event, dispatched before each RMA email is sent: observers receive the RMA, the email type (`SenderInterface::EMAIL_TYPE_*`) and a transport object, and can change the template and the template variables without replacing `SenderInterface`
+
 ## [2.5.1] - 2026-10-02
 
 ### Fixed

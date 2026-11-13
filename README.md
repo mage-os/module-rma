@@ -244,6 +244,34 @@ The module dispatches custom events in `RMARepository::save()` to allow other mo
 | `rma_canceled_after` | Status &rarr; Canceled by Customer | `rma`, `old_status_id`, `new_status_id` |
 | `rma_resolved_after` | Status &rarr; Resolved | `rma`, `old_status_id`, `new_status_id` |
 
+### Email event
+
+`rma_email_send_before` is dispatched by `Service\Email\Sender` right before each RMA email is sent, so other modules can change the template or add template variables without replacing `SenderInterface`.
+
+| Data | Description |
+|---|---|
+| `rma` | The RMA the email is about |
+| `email_type` | One of the `SenderInterface::EMAIL_TYPE_*` constants: `customer_new`, `customer_status_change`, `admin_new` |
+| `transport` | `DataObject` with `template_id` and `template_vars`; the email is sent with whatever the observers leave in it |
+
+```php
+public function execute(Observer $observer): void
+{
+    if ($observer->getData('email_type') !== SenderInterface::EMAIL_TYPE_CUSTOMER_STATUS_CHANGE) {
+        return;
+    }
+
+    $transport = $observer->getData('transport');
+    $transport->setData('template_id', 'my_module_rma_refunded_template');
+    $transport->setData(
+        'template_vars',
+        $transport->getData('template_vars') + ['refunded_amount' => '19.90']
+    );
+}
+```
+
+An exception thrown by an observer is logged like any other send failure and the email is not sent.
+
 ### Example: Observer to book a carrier when a return is approved
 
 **`etc/events.xml`** in your custom module:

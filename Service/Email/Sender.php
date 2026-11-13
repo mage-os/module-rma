@@ -15,6 +15,8 @@ use MageOS\RMA\Model\ResourceModel\Item\CollectionFactory as ItemCollectionFacto
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Catalog\Helper\Image as ImageHelper;
 use Magento\Framework\App\Area;
+use Magento\Framework\DataObject;
+use Magento\Framework\Event\ManagerInterface as EventManagerInterface;
 use Magento\Framework\Mail\Template\TransportBuilder;
 use Magento\Sales\Api\OrderItemRepositoryInterface;
 use Magento\Sales\Api\OrderRepositoryInterface;
@@ -41,6 +43,7 @@ class Sender implements SenderInterface
      * @param ItemConditionRepositoryInterface $itemConditionRepository
      * @param StatusRepositoryInterface $statusRepository
      * @param Emulation $appEmulation
+     * @param EventManagerInterface $eventManager
      */
     public function __construct(
         protected readonly TransportBuilder $transportBuilder,
@@ -56,7 +59,8 @@ class Sender implements SenderInterface
         protected readonly ImageHelper $imageHelper,
         protected readonly ItemConditionRepositoryInterface $itemConditionRepository,
         protected readonly StatusRepositoryInterface $statusRepository,
-        protected readonly Emulation $appEmulation
+        protected readonly Emulation $appEmulation,
+        protected readonly EventManagerInterface $eventManager
     ) {
     }
 
@@ -78,7 +82,7 @@ class Sender implements SenderInterface
             'rma_reason_label' => $this->getReasonLabel($rma),
             'rma_resolution_label' => $this->getResolutionLabel($rma),
             'rma_items' => $this->getRmaItemsData($rma),
-        ]);
+        ], self::EMAIL_TYPE_CUSTOMER_NEW);
     }
 
     /**
@@ -98,7 +102,7 @@ class Sender implements SenderInterface
 
         $this->sendRmaEmail($rma, $templateId, $rma->getCustomerEmail(), $rma->getCustomerName(), fn(): array => [
             'rma_status_label' => $this->getStatusLabel($newStatusId, $storeId),
-        ]);
+        ], self::EMAIL_TYPE_CUSTOMER_STATUS_CHANGE);
     }
 
     /**
@@ -124,7 +128,7 @@ class Sender implements SenderInterface
             'customer_email' => $rma->getCustomerEmail(),
             'rma_reason_label' => $this->getReasonLabel($rma),
             'rma_resolution_label' => $this->getResolutionLabel($rma),
-        ]);
+        ], self::EMAIL_TYPE_ADMIN_NEW);
     }
 
     /**
@@ -133,6 +137,7 @@ class Sender implements SenderInterface
      * @param string $recipientEmail
      * @param string $recipientName
      * @param callable|null $extraVarsProvider
+     * @param string $emailType
      * @return void
      */
     protected function sendRmaEmail(
@@ -140,7 +145,8 @@ class Sender implements SenderInterface
         string $templateId,
         string $recipientEmail,
         string $recipientName,
-        ?callable $extraVarsProvider = null
+        ?callable $extraVarsProvider = null,
+        string $emailType = ''
     ): void {
         $storeId = (int)$rma->getStoreId();
 
@@ -148,15 +154,25 @@ class Sender implements SenderInterface
 
         try {
             $extraVars = $extraVarsProvider !== null ? $extraVarsProvider() : [];
-            $templateVars = array_merge($this->getBaseTemplateVars($rma), $extraVars);
+
+            // Observers can change the template and the template variables through the transport object
+            $transportObject = new DataObject([
+                'template_id' => $templateId,
+                'template_vars' => array_merge($this->getBaseTemplateVars($rma), $extraVars),
+            ]);
+            $this->eventManager->dispatch('rma_email_send_before', [
+                'rma' => $rma,
+                'email_type' => $emailType,
+                'transport' => $transportObject,
+            ]);
 
             $transport = $this->transportBuilder
-                ->setTemplateIdentifier($templateId)
+                ->setTemplateIdentifier((string)$transportObject->getData('template_id'))
                 ->setTemplateOptions([
                     'area' => Area::AREA_FRONTEND,
                     'store' => $storeId,
                 ])
-                ->setTemplateVars($templateVars)
+                ->setTemplateVars((array)$transportObject->getData('template_vars'))
                 ->setFromByScope($this->moduleConfig->getEmailSenderIdentity($storeId), $storeId)
                 ->addTo($recipientEmail, $recipientName)
                 ->getTransport();
