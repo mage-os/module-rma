@@ -60,6 +60,7 @@ class DataProvider extends ModifierPoolDataProvider
         foreach ($items as $resolutionType) {
             $data = $resolutionType->getData();
             $data['store_labels'] = $this->resolutionTypeResource->getStoreLabels($resolutionType);
+            $data['store_values'] = $this->resolutionTypeResource->getStoreValues($resolutionType);
             $this->loadedData[$resolutionType->getId()] = $data;
         }
 

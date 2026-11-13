@@ -113,7 +113,9 @@
         "column": {
             "status_id": true,
             "store_id": true,
-            "label": true
+            "label": true,
+            "is_active": true,
+            "sort_order": true
         },
         "constraint": {
             "PRIMARY": true,
@@ -128,7 +130,9 @@
         "column": {
             "reason_id": true,
             "store_id": true,
-            "label": true
+            "label": true,
+            "is_active": true,
+            "sort_order": true
         },
         "constraint": {
             "PRIMARY": true,
@@ -143,7 +147,9 @@
         "column": {
             "resolution_type_id": true,
             "store_id": true,
-            "label": true
+            "label": true,
+            "is_active": true,
+            "sort_order": true
         },
         "constraint": {
             "PRIMARY": true,
@@ -158,7 +164,9 @@
         "column": {
             "condition_id": true,
             "store_id": true,
-            "label": true
+            "label": true,
+            "is_active": true,
+            "sort_order": true
         },
         "constraint": {
             "PRIMARY": true,

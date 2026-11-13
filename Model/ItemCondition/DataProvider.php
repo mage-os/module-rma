@@ -60,6 +60,7 @@ class DataProvider extends ModifierPoolDataProvider
         foreach ($items as $itemCondition) {
             $data = $itemCondition->getData();
             $data['store_labels'] = $this->itemConditionResource->getStoreLabels($itemCondition);
+            $data['store_values'] = $this->itemConditionResource->getStoreValues($itemCondition);
             $this->loadedData[$itemCondition->getId()] = $data;
         }
 

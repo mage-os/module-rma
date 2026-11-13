@@ -44,6 +44,10 @@
                     <item name="class" xsi:type="string">MageOS\RMA\Ui\DataProvider\Form\Modifier\StoreLabels</item>
                     <item name="sortOrder" xsi:type="number">20</item>
                 </item>
+                <item name="store_values" xsi:type="array">
+                    <item name="class" xsi:type="string">MageOS\RMA\Ui\DataProvider\Form\Modifier\StoreValues</item>
+                    <item name="sortOrder" xsi:type="number">30</item>
+                </item>
             </argument>
         </arguments>
     </virtualType>

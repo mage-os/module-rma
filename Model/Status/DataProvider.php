@@ -62,6 +62,7 @@ class DataProvider extends ModifierPoolDataProvider
             $data = $status->getData();
             $data['is_system'] = StatusCodes::isProtected($data['code'] ?? '');
             $data['store_labels'] = $this->statusResource->getStoreLabels($status);
+            $data['store_values'] = $this->statusResource->getStoreValues($status);
             $this->loadedData[$status->getId()] = $data;
         }
 

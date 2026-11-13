@@ -9,6 +9,8 @@ use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 
 class ItemCondition extends AbstractDb
 {
+    use LookupStoreRowsTrait;
+
     /**
      * @var string
      */
@@ -27,6 +29,7 @@ class ItemCondition extends AbstractDb
         $this->_init('rma_item_condition', 'entity_id');
         $this->_useIsObjectNew = true;
         $this->labelsTable = $this->getTable('rma_item_condition_label');
+        $this->labelForeignKey = 'condition_id';
     }
 
     /**
@@ -38,7 +41,8 @@ class ItemCondition extends AbstractDb
         $connection = $this->getConnection();
         $select = $connection->select()
             ->from($this->labelsTable, ['store_id', 'label'])
-            ->where('condition_id = ?', (int)$object->getId());
+            ->where('condition_id = ?', (int)$object->getId())
+            ->where('label IS NOT NULL');
 
         return $connection->fetchPairs($select);
     }
@@ -53,6 +57,7 @@ class ItemCondition extends AbstractDb
 
         if ($object->getId()) {
             $object->setData('store_labels', $this->getStoreLabels($object));
+            $object->setData('store_values', $this->getStoreValues($object));
         }
 
         return $this;
@@ -66,27 +71,7 @@ class ItemCondition extends AbstractDb
     {
         parent::_afterSave($object);
 
-        if ($object->hasData('store_labels')) {
-            $connection = $this->getConnection();
-            $connection->delete($this->labelsTable, ['condition_id = ?' => (int)$object->getId()]);
-
-            $labels = $object->getData('store_labels');
-            $data = [];
-            foreach ($labels as $storeId => $label) {
-                if (empty($label)) {
-                    continue;
-                }
-                $data[] = [
-                    'condition_id' => (int)$object->getId(),
-                    'store_id' => (int)$storeId,
-                    'label' => $label,
-                ];
-            }
-
-            if (!empty($data)) {
-                $connection->insertMultiple($this->labelsTable, $data);
-            }
-        }
+        $this->saveStoreRows($object);
 
         return $this;
     }
