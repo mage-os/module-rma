@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.6.1] - 2026-11-17
+
+### Security
+- RMA attachment uploads are stored in the temp folder under an unguessable random name (`<32 hex>.<ext>`) returned only to the uploader, and `AttachmentService::moveFromTmpAndSave()` only accepts names in that format, so another customer can no longer claim an upload by guessing its filename; moving into `rma/attachments/{rmaId}/` no longer overwrites an existing attachment with the same name; uploads without an extension are rejected. The original filename is still used as display and download name. Temp files uploaded before the update and not yet submitted must be uploaded again by @rhoerr in #68 (fixes #57)
+
 ## [2.6.0] - 2026-11-13
 
 ### Added
