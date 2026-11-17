@@ -28,6 +28,7 @@ class AttachmentService
     const BASE_PATH = 'rma/attachments';
     const BYTES_PER_KB = 1024;
     const BYTES_PER_MB = 1024 * 1024;
+    private const TMP_FILE_PATTERN = '/^[a-f0-9]{32}\.[a-z0-9]+$/D';
 
     protected WriteInterface $varDirectory;
 
@@ -72,7 +73,7 @@ class AttachmentService
 
         $uploader = $this->uploaderFactory->create(['fileId' => $fileId]);
         $uploader->setAllowedExtensions($this->moduleConfig->getAllowedAttachmentExtensions());
-        $uploader->setAllowRenameFiles(true);
+        $uploader->setAllowRenameFiles(false);
         $uploader->setFilesDispersion(false);
 
         if (!$uploader->checkMimeType($this->getAllowedMimeTypes())) {
@@ -80,7 +81,12 @@ class AttachmentService
         }
 
         $tmpPath = $this->varDirectory->getAbsolutePath(self::BASE_TMP_PATH);
-        $result = $uploader->save($tmpPath);
+        $extension = strtolower((string)$uploader->getFileExtension());
+        if (!preg_match('/^[a-z0-9]+$/D', $extension)) {
+            throw new LocalizedException(__('File type not allowed.'));
+        }
+        $tmpName = bin2hex(random_bytes(16)) . '.' . $extension;
+        $result = $uploader->save($tmpPath, $tmpName);
 
         if (!$result) {
             throw new LocalizedException(__('File cannot be saved to the temporary folder.'));
@@ -118,8 +124,8 @@ class AttachmentService
         $saved = [];
 
         foreach (array_slice($tmpFiles, 0, $maxFiles) as $tmpFile) {
-            $fileName = basename($tmpFile['file'] ?? '');
-            if ($fileName === '') {
+            $fileName = (string)($tmpFile['file'] ?? '');
+            if (!preg_match(self::TMP_FILE_PATTERN, $fileName)) {
                 continue;
             }
 
@@ -127,7 +133,7 @@ class AttachmentService
             $destDir = self::BASE_PATH . '/' . $rmaId;
             $destPath = $destDir . '/' . $fileName;
 
-            if (!$this->varDirectory->isExist($sourcePath)) {
+            if (!$this->varDirectory->isExist($sourcePath) || $this->varDirectory->isExist($destPath)) {
                 continue;
             }
 

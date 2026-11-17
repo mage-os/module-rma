@@ -23,11 +23,18 @@ use PHPUnit\Framework\TestCase;
 class AttachmentServiceTest extends TestCase
 {
     private WriteInterface&MockObject $varDirectory;
+    private AttachmentRepositoryInterface&MockObject $attachmentRepository;
     private AttachmentService $service;
 
     protected function setUp(): void
     {
         $this->varDirectory = $this->createMock(WriteInterface::class);
+        $this->attachmentRepository = $this->createMock(AttachmentRepositoryInterface::class);
+        $moduleConfig = $this->createMock(ModuleConfig::class);
+        $moduleConfig->method('getMaxAttachmentFiles')->willReturn(5);
+        $attachmentFactory = $this->createMock(AttachmentInterfaceFactory::class);
+        $attachmentFactory->method('create')
+            ->willReturnCallback(fn () => $this->createMock(AttachmentInterface::class));
 
         $filesystem = $this->createMock(Filesystem::class);
         $filesystem->method('getDirectoryWrite')->willReturn($this->varDirectory);
@@ -35,11 +42,11 @@ class AttachmentServiceTest extends TestCase
         $this->service = new AttachmentService(
             $filesystem,
             $this->createMock(UploaderFactory::class),
-            $this->createMock(ModuleConfig::class),
-            $this->createMock(AttachmentInterfaceFactory::class),
-            $this->createMock(AttachmentRepositoryInterface::class),
+            $moduleConfig,
+            $attachmentFactory,
+            $this->attachmentRepository,
             $this->createMock(AttachmentCollectionFactory::class),
-            $this->createMock(Mime::class),
+            $this->createConfiguredMock(Mime::class, ['getMimeType' => 'application/pdf']),
             $this->createMock(JsonSerializer::class)
         );
     }
@@ -134,5 +141,56 @@ class AttachmentServiceTest extends TestCase
             'fractional' => [1572864,       '1.5 MB'],
             'zero bytes' => [0,             '0 B'],
         ];
+    }
+
+    // -------------------------------------------------------------------------
+    // moveFromTmpAndSave — temp file claim and overwrite guards
+    // -------------------------------------------------------------------------
+
+    public static function unclaimableTmpFileProvider(): array
+    {
+        return [
+            'original filename'  => ['victim-invoice.pdf'],
+            'path traversal'     => ['../attachments/1/' . str_repeat('a', 32) . '.pdf'],
+            'uppercase token'    => [str_repeat('A', 32) . '.pdf'],
+            'short token'        => [str_repeat('a', 31) . '.pdf'],
+            'missing extension'  => [str_repeat('a', 32)],
+            'trailing newline'   => [str_repeat('a', 32) . ".pdf\n"],
+        ];
+    }
+
+    #[DataProvider('unclaimableTmpFileProvider')]
+    public function testMoveFromTmpAndSaveIgnoresNonTokenFileNames(string $file): void
+    {
+        $this->varDirectory->method('isExist')->willReturn(true);
+        $this->varDirectory->expects($this->never())->method('renameFile');
+        $this->attachmentRepository->expects($this->never())->method('save');
+
+        $this->assertSame([], $this->service->moveFromTmpAndSave(1, [['file' => $file, 'name' => 'x.pdf']]));
+    }
+
+    public function testMoveFromTmpAndSaveMovesTokenFile(): void
+    {
+        $token = str_repeat('a', 32) . '.pdf';
+        $this->varDirectory->method('isExist')->willReturnMap([
+            [AttachmentService::BASE_TMP_PATH . '/' . $token, true],
+            [AttachmentService::BASE_PATH . '/7/' . $token, false],
+        ]);
+        $this->varDirectory->expects($this->once())
+            ->method('renameFile')
+            ->with(AttachmentService::BASE_TMP_PATH . '/' . $token, AttachmentService::BASE_PATH . '/7/' . $token);
+        $this->attachmentRepository->expects($this->once())->method('save');
+
+        $this->assertCount(1, $this->service->moveFromTmpAndSave(7, [['file' => $token, 'name' => 'x.pdf']]));
+    }
+
+    public function testMoveFromTmpAndSaveNeverOverwritesExistingAttachment(): void
+    {
+        $token = str_repeat('a', 32) . '.pdf';
+        $this->varDirectory->method('isExist')->willReturn(true);
+        $this->varDirectory->expects($this->never())->method('renameFile');
+        $this->attachmentRepository->expects($this->never())->method('save');
+
+        $this->assertSame([], $this->service->moveFromTmpAndSave(7, [['file' => $token, 'name' => 'x.pdf']]));
     }
 }

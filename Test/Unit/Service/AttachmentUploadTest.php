@@ -220,4 +220,55 @@ class AttachmentUploadTest extends TestCase
         } catch (LocalizedException) {
         }
     }
+
+    public function testUploadToTmpStoresFileUnderRandomNameAndKeepsOriginalName(): void
+    {
+        $this->moduleConfig->method('getMaxAttachmentFileSizeBytes')->willReturn(10 * 1024 * 1024);
+        $this->moduleConfig->method('getAllowedAttachmentExtensions')->willReturn(['pdf']);
+
+        $tmpDir = sys_get_temp_dir() . '/rma-upload-test-' . bin2hex(random_bytes(4));
+        mkdir($tmpDir);
+
+        $uploader = $this->makeUploader();
+        $uploader->method('checkMimeType')->willReturn(true);
+        $uploader->method('getFileExtension')->willReturn('PDF');
+        $uploader->expects($this->once())
+            ->method('save')
+            ->with($tmpDir, $this->matchesRegularExpression('/^[a-f0-9]{32}\.pdf$/'))
+            ->willReturnCallback(function (string $dir, string $name): array {
+                file_put_contents($dir . '/' . $name, 'x');
+                return ['file' => $name, 'name' => 'invoice.pdf', 'type' => 'application/pdf'];
+            });
+
+        $this->uploaderFactory->method('create')->willReturn($uploader);
+        $this->varDirectory->method('getAbsolutePath')->willReturn($tmpDir);
+
+        try {
+            $result = $this->service->uploadToTmp('rma_file');
+        } finally {
+            array_map('unlink', glob($tmpDir . '/*'));
+            rmdir($tmpDir);
+        }
+
+        $this->assertMatchesRegularExpression('/^[a-f0-9]{32}\.pdf$/', $result['file']);
+        $this->assertSame('invoice.pdf', $result['name']);
+    }
+
+    public function testUploadToTmpRejectsFileWithoutExtension(): void
+    {
+        $this->expectException(LocalizedException::class);
+
+        $this->moduleConfig->method('getMaxAttachmentFileSizeBytes')->willReturn(10 * 1024 * 1024);
+        $this->moduleConfig->method('getAllowedAttachmentExtensions')->willReturn([]);
+
+        $uploader = $this->makeUploader();
+        $uploader->method('checkMimeType')->willReturn(true);
+        $uploader->method('getFileExtension')->willReturn('');
+        $uploader->expects($this->never())->method('save');
+
+        $this->uploaderFactory->method('create')->willReturn($uploader);
+        $this->varDirectory->method('getAbsolutePath')->willReturn('/var/www/html/var/rma/tmp');
+
+        $this->service->uploadToTmp('rma_file');
+    }
 }
